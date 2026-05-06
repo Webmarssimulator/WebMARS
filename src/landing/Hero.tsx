@@ -33,7 +33,7 @@ export function Hero() {
             className="mt-4 max-w-[540px] text-5xl font-bold leading-[1.1] md:text-6xl"
             style={{ color: 'var(--l-ink-1)' }}
           >
-            MIPS assembly, finally in your browser.
+            A modern MIPS simulator that runs in your browser.
           </h1>
           <p
             className="mt-6 max-w-[520px] text-lg leading-[1.5] md:text-xl"
@@ -41,8 +41,7 @@ export function Hero() {
           >
             WebMARS is a complete MIPS development environment — assembler,
             simulator, debugger, and visual tools — running entirely in your
-            browser. No Java, no install, no setup. Built by three students
-            for the next generation of computer-architecture courses.
+            browser. No Java, no install, no setup. Built by three students.
           </p>
 
           {/* CTAs */}
