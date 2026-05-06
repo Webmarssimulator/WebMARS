@@ -1,0 +1,37 @@
+/* Phase 4 landing-page design tokens. Scoped to .landing so the
+   IDE's existing dark tokens (src/ui/tokens.css) are untouched. */
+
+.landing {
+  /* Light palette — different from the IDE's dark theme */
+  --l-bg:           #FFFFFF;
+  --l-bg-alt:       #F7F8FB;
+  --l-bg-dark:      #0F1419;
+  --l-border:       #E2E5EC;
+  --l-ink-1:        #1A1D24;
+  --l-ink-2:        #5A6378;
+  --l-ink-3:        #8B95A8;
+
+  /* Reuse the IDE's accent so the brand color matches both pages */
+  --l-accent:       #22D3EE;
+  --l-accent-dark:  #0E7490;
+  --l-accent-soft:  rgba(34, 211, 238, 0.10);
+
+  --l-success:      #00B86B;
+  --l-warn:         #FFB020;
+
+  --l-radius-card:  16px;
+  --l-radius-btn:   10px;
+
+  --l-shadow-sm:    0 1px 3px rgba(0,0,0,0.06);
+  --l-shadow-md:    0 4px 16px rgba(0,0,0,0.08);
+  --l-shadow-lg:    0 12px 40px rgba(0,0,0,0.12);
+  --l-shadow-xl:    0 24px 64px rgba(0,0,0,0.16);
+
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--l-ink-1);
+  background: var(--l-bg);
+}
+
+.landing .mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
