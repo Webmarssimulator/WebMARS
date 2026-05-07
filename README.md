@@ -182,11 +182,7 @@ standard we verify correctness against.
 ## AI tools used
 
 This project was developed with the assistance of Claude Code
-(Anthropic) as a code-generation and pair-programming tool. The
-development pattern: I authored the PRD, architecture decisions,
-design tokens, and multi-agent execution prompts; Claude Code
-generated the corresponding implementation under those instructions
-and committed on my behalf. All commits are authored under my git
-identity because I planned, directed, reviewed, and accept
+(Anthropic) as a pair-programming tool. All commits are authored under our git
+identity because we planned, directed, coded, reviewed, and accept
 responsibility for the work. The Day 1 plan and execution prompts
 are tracked in `docs/` for transparency.
