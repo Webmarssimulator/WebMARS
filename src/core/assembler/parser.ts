@@ -110,6 +110,7 @@ const INSTRUCTION_SCHEMA: Record<string, OperandKind[]> = {
   la:    ["R","L"],
   move:  ["R","R"],
   mul:   ["R","R","R"],
+  rem:   ["R","R","R"],
   neg:   ["R","R"], not: ["R","R"],
   // No operands
   nop:      [],
