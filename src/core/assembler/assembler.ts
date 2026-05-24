@@ -371,7 +371,11 @@ function translateIR(
       "000000" + reg(op1) + reg(op2) + "0000000000011000",  // mult rs, rt
       "0000000000000000" + reg(op0) + "00000010010",         // mflo rd
     ];
-
+      // ── Pseudo: rem rd, rs, rt  →  div rs, rt  +  mfhi rd ──────────────────
+case "rem": return [
+  "000000" + reg(op1) + reg(op2) + "0000000000011010",  // div rs, rt  (funct=011010)
+  "0000000000000000" + reg(op0) + "00000010000",         // mfhi rd     (funct=010000)
+];
     // ── J-type ───────────────────────────────────────────────────────────────
     case "j":   return ["000010" + jumpTarget(op0, labelMap)];
     case "jal": return ["000011" + jumpTarget(op0, labelMap)];
