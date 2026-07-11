@@ -159,7 +159,7 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
 
   ── DYNAMIC IMPLEMENTATION AGENTS (inserted by AGENT 01) ──────────────────────
   AGENT 02 — API Client, Toast System & Env-Aware Base URL ...... ✅ COMPLETE
-  AGENT 03 — Editor Persistence Across Refresh .................. ⬜ NOT STARTED
+  AGENT 03 — Editor Persistence Across Refresh .................. ✅ COMPLETE
   AGENT 04 — Monaco Light Theme + System Preference ............. ⬜ NOT STARTED
   AGENT 05 — rem Pseudo-Instruction (Assembler + Tests) ......... ⬜ NOT STARTED
   AGENT 06 — Tools: Bitmap Grid Sizes + Screen Magnifier ........ ⬜ NOT STARTED
@@ -215,7 +215,13 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   5 new api tests; 130/130 green; typecheck/lint/build exit 0; bundle
   450.46 kB (+33 kB sonner). Note: upstream RunController ALREADY has the
   audit-C2 visibility check — AGENT 12 scope shrinks to PUT endpoint +
-  Testcontainers. PR #42.
+  Testcontainers. PR #42 merged, main @ 4ac89d2.
+  ------------------------------------------------------------------------------
+  [2026-07-10] AGENT 03: editor persistence (REQ-001) done. Workspace
+  (files + active tab) persists to webmars:workspace-v1, debounced 250ms
+  with beforeunload flush; hydrates on boot; simulator state provably
+  excluded (payload keys asserted in test). 4 new tests; 134/134 green;
+  typecheck/lint/build exit 0. PR #43.
   ------------------------------------------------------------------------------
 
 ================================================================================
@@ -757,7 +763,22 @@ APPENDIX A-02 — API Client, Toast System & Env-Aware Base URL
   PR # / MAIN COMMIT: PR #42.
 --------------------------------------------------------------------------------
 APPENDIX A-03 — Editor Persistence
-  STATUS: / DATE: / PER-REQ (001): / BUILD+TEST: / PR #:
+  STATUS: ✅ COMPLETE / DATE: 2026-07-10
+  REQ-001: IMPLEMENTED — src/hooks/useSimulator.ts: readPersistedWorkspace/
+    writePersistedWorkspace (key webmars:workspace-v1, validated parse,
+    privacy-mode-safe try/catch per existing convention); initialFiles/
+    activeFileId/source hydrate from the persisted workspace; store
+    subscription persists {files(id,name,source,modified), activeFileId}
+    debounced 250ms + beforeunload flush. Simulator state excluded by
+    construction — payload keys asserted to be exactly [activeFileId,
+    files] in test. FileSystemFileHandle rehydrates as null. Mechanism
+    follows the store's manual per-key convention, not persist middleware
+    (G10 note in A-01) — behavioral acceptance identical.
+    src/tests/persist.test.ts: 4 tests (debounced write, rehydration,
+    no simulator state, corrupt-payload fallback).
+  BUILD+TEST: typecheck 0 / lint 0 / build exit 0 / vitest 134/134 (16
+    files). Live-browser refresh walk deferred to A91 Q1.
+  PR # / MAIN COMMIT: PR #43.
 --------------------------------------------------------------------------------
 APPENDIX A-04 — Monaco Light Theme + System Preference
   STATUS: / DATE: / PER-REQ (002): / BUILD+TEST: / PR #:
@@ -802,7 +823,7 @@ the exact owner action. At AGENT 94 exit: zero ⬜, zero 🔄.
 
   ID      | PDF PAGE/SECTION | SUMMARY | CATEGORY | OWNER | STATUS | PR # | EVIDENCE
   --------|------------------|---------|----------|-------|--------|------|---------
-  REQ-001 | p.5-6 §2.1; p.32 §6.2 | Persist editor source/files/activeFileId across refresh; simulator state NOT persisted; private-mode safe; last-write-wins OK [mechanism per codebase convention, SF5] | FIX | A03 | ⬜ | |
+  REQ-001 | p.5-6 §2.1; p.32 §6.2 | Persist editor source/files/activeFileId across refresh; simulator state NOT persisted; private-mode safe; last-write-wins OK [mechanism per codebase convention, SF5] | FIX | A03 | IMPLEMENTED | #43 | useSimulator.ts workspace helpers + subscribe; persist.test.ts (4 tests)
   REQ-002 | p.6-7 §2.2; p.33-34 §6.3 | Monaco webmars-light theme; theme preference incl. 'system' w/ live OS tracking; SettingsDialog picker; shell+editor stay in sync [hc keeps dark Monaco] | FIX | A04 | ⬜ | |
   REQ-003 | p.7-8 §2.3 | Backend: DELETE /snippets/{id} owner check, 404 to non-owners | SECURITY | A12 | ⬜ | | pre-exists upstream (verify)
   REQ-004 | p.8 §2.4 | Backend: login failures return 401 'Invalid credentials' (same msg both cases) | FIX | A12 | ⬜ | | pre-exists upstream (verify)
