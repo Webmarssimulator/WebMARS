@@ -174,8 +174,8 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   AGENT 90 — Cross-Cutting Quality Sweep ........................ ✅ COMPLETE
   AGENT 91 — Gap Closure: PDF vs Reality, Q1/Q2/Q3 .............. ✅ COMPLETE
   AGENT 92 — Infrastructure & Config via CLI .................... ✅ COMPLETE
-  AGENT 93 — AI Tooling Disclosure (single-purpose PR) .......... ⬜ NOT STARTED
-  AGENT 94 — FINAL VERIFICATION + FULL REGRESSION + MERGE ....... ⬜ NOT STARTED
+  AGENT 93 — AI Tooling Disclosure (single-purpose PR) .......... ✅ COMPLETE
+  AGENT 94 — FINAL VERIFICATION + FULL REGRESSION + MERGE ....... ✅ COMPLETE
 
   LEDGER NOTES (append one dated line per completed agent):
   ------------------------------------------------------------------------------
@@ -320,7 +320,24 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   with the exact dashboard steps; production smoke (REQ-044) chained on
   that + webmars-api#24. CI verified green on every main push this run;
   secret-pattern scan step added to ci.yml (REQ-045). REQ-017/043/045/
-  048 flipped. PR #65.
+  048 flipped. PR #65 merged, main @ af1ad96.
+  ------------------------------------------------------------------------------
+  [2026-07-10] AGENT 93: AI disclosure done. Verbatim standard text as
+  the README's final section (License precedes Acknowledgements here, so
+  the bottom-placement fallback applies); PR #66 was README-only with
+  the exact required title; commit owner-authored, zero trailers.
+  Merged, main @ 03cbcf9.
+  ------------------------------------------------------------------------------
+  [2026-07-10] AGENT 94 — FINAL. Fresh clone @ 03cbcf9: install/build/
+  test/typecheck/lint all green (138/138) using only documented
+  commands; pre-existing flows (Hello run, Examples, Step/Reset) intact;
+  6 random Q1 spot-checks pass in the fresh clone. Matrix: 49 rows = 40
+  IMPLEMENTED + 9 ⛔ (exact owner actions in A-94's blocked report),
+  0 ⬜/🔄. History audit: 17 owner-authored PR-merged commits, zero AI
+  identities/trailers, zero direct-to-main, zero force-pushes. 27 PRs
+  merged (#40–#66) + upstream webmars-api#24 open for Landon. Verify
+  clone deleted. THE GOLDEN LOOP'S STOPPING CONDITION IS SATISFIED.
+  PR #67.
   ------------------------------------------------------------------------------
 
 ================================================================================
@@ -1356,8 +1373,78 @@ APPENDIX A-92 — Infrastructure & Config via CLI
     owner-gated and recorded as the exact ⛔ step.
   PR # / MAIN COMMIT: PR #65.
 --------------------------------------------------------------------------------
-(APPENDIX A blocks for agents 93–94 are filled as those agents complete,
-using the A-93..A-94 field lists from the source master prompt.)
+APPENDIX A-93 — AI Tooling Disclosure PR
+  STATUS: ✅ COMPLETE / DATE: 2026-07-10
+  README SECTION LOCATION: README.md, final section '## AI tools used'
+    (three-paragraph standard wording, verbatim per the 93.2 text with
+    the singular Claude Code phrasing). Placement note: this README
+    orders License BEFORE Acknowledgements, so the between-them rule is
+    inapplicable; the bottom-placement fallback applies (flagged in the
+    A-11 ledger note before execution). The section replaced an older
+    ad-hoc AI note.
+  PR CONTAINED ONLY THE README CHANGE: gh pr diff 66 --name-only →
+    README.md (single file).
+  PR TITLE EXACT-MATCH: 'docs: add AI tooling disclosure' (gh pr view 66
+    --json title confirms).
+  COMMIT AUTHOR/COMMITTER: Author Bryan Djenabia
+    <bdjenabia5@gmail.com>; Commit Bryan Djenabia <bdjenabia5@gmail.com>
+    (git log --format=full); zero trailers.
+  PR # / MAIN COMMIT: PR #66 merged, main @ 03cbcf9. (This appendix
+    entry rides in AGENT 94's PR so #66 stays README-only.)
+--------------------------------------------------------------------------------
+APPENDIX A-94 — Final Verification
+  STATUS: ✅ COMPLETE / DATE: 2026-07-10
+  FRESH-CLONE TRANSCRIPT SUMMARY: git clone → WebMARS-verify @ 03cbcf9;
+    npm install → OK; npm run build → exit 0; npm test → 138/138;
+    npm run typecheck → 0; npm run lint → 0; npm run dev -- --port 5199
+    → served (all commands exactly as documented in README).
+  MATRIX AUDIT RESULT: 49 rows (48 REQs + REQ-002-EXT-1): 40
+    IMPLEMENTED w/ merged-PR refs, 9 ⛔ BLOCKED each naming the exact
+    owner action, 0 ⬜, 0 🔄 (B5 satisfied). Random Q1 spot-checks
+    exercised IN THE FRESH CLONE: REQ-002 light theme → Monaco bg
+    rgb(255,255,255); REQ-023 rem (-17 rem 5) printed -2; REQ-021
+    AuthModal opens (+ Escape); REQ-028 8×8 option present; REQ-042
+    Help pseudo tab lists 'rem $rd, $rs, $rt'; REQ-001 marker survived
+    reload. All pass.
+  REGRESSION PASS: suite 138/138 on the fresh clone. Manual walkthrough
+    of PRE-EXISTING flows: default Hello example assembles + runs
+    ('Hello, MIPS!' printed); Examples → Factorial loads; Step and
+    Reset operate. Zero regressions outstanding.
+  GIT HISTORY AUDIT: 17 commits on main since baseline 5934790 — every
+    one authored Bryan <bdjenabia5@gmail.com> (committer 'GitHub
+    <noreply@github.com>' = GitHub's squash-merge web-flow, standard);
+    zero Claude/Anthropic identities; zero Co-Authored-By/AI trailers
+    (trailer grep empty); every commit carries a (#NN) merged-PR ref —
+    zero direct-to-main; zero force-pushes (fast-forward pulls only,
+    all session pushes were feature branches). Fork commits (webmars-
+    api#24): both authored Bryan Djenabia <bdjenabia5@gmail.com>.
+  BLOCKED-ITEM REPORT (all genuinely owner-only; grouped by action):
+    1. Landon (backend owner): review + merge
+       https://github.com/landclay715/webmars-api/pull/24, run
+       ./mvnw verify (needs Docker), redeploy Railway → unblocks
+       REQ-003/014/015/026/027 and fully restores share links, feeds,
+       drawer lists, delete, and run history in production.
+    2. Landon: git-history scrub per plan §7.1 — the old DB password is
+       still reachable (commits 8afb44c/8a6cf1e in webmars-api):
+       git filter-repo --replace-text + force-push + team re-clone;
+       also rotate/confirm the Railway production DB password
+       (REQ-005). Force-push is owner-approved-only (R6/H6).
+    3. Bryan: Vercel → WebMARS project → Settings → Environment
+       Variables → add VITE_API_BASE =
+       https://webmars-api-production.up.railway.app (Production) →
+       Redeploy (REQ-019). Then, with 1. deployed, walk the §9.3
+       production smoke checklist items 46–82 (REQ-044).
+    4. Bryan/team: record the v1.2 demo clip (save→share→incognito→
+       run→history) and post 'WebMARS v1.2 is live' to the course
+       channel (REQ-047). Optional: set a billing/expiry reminder for
+       the Railway Postgres (plan §10.3's Render-90-day analog).
+  FINAL TOTALS: 49 matrix rows — 40 delivered, 9 owner-gated. 27 PRs
+    merged on this repo (#40–#66 incl. 10 v1.3 issues #51–#60 created,
+    which consumed the intervening numbers) + 1 upstream PR open
+    (webmars-api#24). Tests 125 → 138 (13 added). Build/lint/typecheck/
+    CI green on main; CI now includes a secret-pattern scan.
+  PR # / MAIN COMMIT: PR #67 (this document update).
+--------------------------------------------------------------------------------
 
 ================================================================================
     APPENDIX B — REQUIREMENTS TRACEABILITY MATRIX (AGENT 01 POPULATES)
