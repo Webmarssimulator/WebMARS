@@ -405,9 +405,17 @@ function writePersistedMemoryView(view: PersistedMemoryView): void {
 
 // ─ settings (theme / font / simulator toggles) ─
 
-export type ThemeName = 'dark' | 'light' | 'hc'
+// 'system' follows the OS light/dark preference live (via the
+// useSystemColorScheme hook). resolveTheme collapses the preference
+// to a concrete shell theme; 'hc' is its own concrete theme.
+export type ThemeName = 'dark' | 'light' | 'hc' | 'system'
+export type ResolvedTheme = 'dark' | 'light' | 'hc'
 
-export const THEMES: ReadonlyArray<ThemeName> = ['dark', 'light', 'hc']
+export const THEMES: ReadonlyArray<ThemeName> = ['dark', 'light', 'hc', 'system']
+
+export function resolveTheme(preference: ThemeName, systemScheme: 'light' | 'dark'): ResolvedTheme {
+  return preference === 'system' ? systemScheme : preference
+}
 
 export const EDITOR_FONT_MIN  = 10
 export const EDITOR_FONT_MAX  = 22

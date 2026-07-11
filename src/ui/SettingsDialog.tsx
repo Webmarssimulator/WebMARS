@@ -18,9 +18,10 @@ const TABS: ReadonlyArray<{ id: Tab; label: string }> = [
 ]
 
 const THEME_LABELS: Record<ThemeName, { title: string; sub: string }> = {
-  dark:  { title: 'Dark',           sub: 'Default. Low-contrast surfaces, cyan accent.' },
-  light: { title: 'Light',          sub: 'Inverted shell. Editor stays on the dark Monaco theme.' },
-  hc:    { title: 'High contrast',  sub: 'Pure-black + max ink. WCAG AAA on shell chrome.' },
+  dark:   { title: 'Dark',           sub: 'Default. Low-contrast surfaces, cyan accent.' },
+  light:  { title: 'Light',          sub: 'Inverted shell and a matching light editor theme.' },
+  hc:     { title: 'High contrast',  sub: 'Pure-black + max ink. WCAG AAA on shell chrome.' },
+  system: { title: 'System',         sub: 'Follows your OS light/dark preference, live.' },
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -205,9 +206,9 @@ export function SettingsDialog() {
                   ))}
                 </div>
                 <p className="text-[10px] italic text-ink-3">
-                  Monaco's editor theme is dark in every mode — light /
-                  HC swap shell chrome only. A matching editor theme
-                  lands when the language registration is refactored.
+                  Light and System themes switch the Monaco editor too.
+                  High contrast keeps the dark editor theme — its AAA
+                  treatment applies to shell chrome.
                 </p>
               </Section>
             )}
