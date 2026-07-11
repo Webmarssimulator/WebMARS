@@ -165,7 +165,7 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   AGENT 06 — Tools: Bitmap Grid Sizes + Screen Magnifier ........ ✅ COMPLETE
   AGENT 07 — Accounts UI: Auth Slice + AuthModal + Toolbar ...... ✅ COMPLETE
   AGENT 08 — Save, Share & Deep Links (?snippet=<id>) ........... ✅ COMPLETE
-  AGENT 09 — My Snippets Drawer + Public Feed ................... ⬜ NOT STARTED
+  AGENT 09 — My Snippets Drawer + Public Feed ................... ✅ COMPLETE
   AGENT 10 — Run History: Logging Hook + HistoryPanel ........... ⬜ NOT STARTED
   AGENT 11 — Polish, A11y, Docs, Tests Completion, v1.3 Issues .. ⬜ NOT STARTED
   AGENT 12 — Backend: Verification + Gap PR from Fork ........... ⬜ NOT STARTED
@@ -258,7 +258,14 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   {id} and the populated public feed return 500 (lazy owner proxy +
   open-in-view=false) — share links/feed are DOWN upstream; fix (plan's
   own SnippetResponse DTO) routed to AGENT 12's fork PR. 138/138 green.
-  PR #48.
+  PR #48 merged, main @ 1b3fa4a.
+  ------------------------------------------------------------------------------
+  [2026-07-10] AGENT 09: snippets drawer + public feed (REQ-032/033)
+  done as RightPanel accordion sections; ConfirmDialog component ships
+  (REQ-036 base). Live: empty state + discovery link + error states
+  verified; ready-state proven with route mocks (rows, badges, load,
+  delete round-trip, pagination). ⚠ Upstream DELETE also 500s (same
+  lazy-proxy bug) — A12 scope grows. 138/138 green. PR #49.
   ------------------------------------------------------------------------------
 
 ================================================================================
@@ -962,7 +969,32 @@ APPENDIX A-08 — Save, Share & Deep Links
   PR # / MAIN COMMIT: PR #48.
 --------------------------------------------------------------------------------
 APPENDIX A-09 — My Snippets + Public Feed
-  STATUS: / DATE: / PER-REQ (032/033): / BUILD+TEST: / PR #:
+  STATUS: ✅ COMPLETE / DATE: 2026-07-10
+  REQ-032: IMPLEMENTED — src/ui/MySnippetsDrawer.tsx in a RightPanel
+    accordion section ('My Snippets'): /snippets/mine list w/ title,
+    updated timestamp, public/private badge; click-to-load (+ URL sync);
+    Rename edit-in-place (Enter/blur commits → PUT, Escape cancels);
+    Delete w/ ConfirmDialog (exact D9 copy); + New Snippet clears the
+    binding; sign-in prompt when logged out; loading/empty/error (named
+    HTTP status + Retry) states. src/ui/ConfirmDialog.tsx NEW (REQ-036
+    component, keyboard contract, focus lands on Cancel).
+  REQ-033: IMPLEMENTED — src/ui/PublicFeed.tsx accordion section:
+    paginated /snippets/public (title/owner/updated, Prev/Next + 'Page X
+    of Y'), click-to-load; 'See public snippets' link in the drawer's
+    empty state expands + scrolls to the feed; exact empty copy 'No
+    public snippets yet. Be the first.'
+  LIVE VERIFICATION: fresh-user empty state exact copy + discovery link
+    expand verified against production; error states verified live
+    (upstream 500 → 'HTTP 500' named + Retry). READY-state rendering
+    verified via playwright route mocks (backend list endpoints 500
+    upstream — A-08 bug): 2 rows w/ correct badges; row click → editor
+    text 'li $t0, 1' + URL ?snippet=11; ConfirmDialog copy verbatim;
+    delete → 204 → toast; feed owner + 'Page 1 of 3' pagination.
+  ⚠ UPSTREAM (adds to A-08 finding, routed to A12): DELETE /snippets/
+    {id} ALSO 500s in production (same lazy-owner proxy in the owner
+    check) — verified via direct API probe (apiDeleteStatus: 500).
+  BUILD+TEST: typecheck 0 / lint 0 / build exit 0 / vitest 138/138.
+  PR # / MAIN COMMIT: PR #49.
 --------------------------------------------------------------------------------
 APPENDIX A-10 — Run History
   STATUS: / DATE: / PER-REQ (030/034): / BUILD+TEST: / PR #:
@@ -1021,8 +1053,8 @@ the exact owner action. At AGENT 94 exit: zero ⬜, zero 🔄.
   REQ-029 | p.47 §8.2; p.21 D2 | data-magnify-region on RegisterTable, MemoryPanel, ConsolePanel, StatusBar, FpuRegisterTable (+small-text panels); Monaco excluded | FEATURE | A06 | IMPLEMENTED | #46 | 8 panels tagged; A-06
   REQ-030 | p.49 §8.3; p.25 D6 | Run-logging hook: fire-and-forget at run end (COMPLETED/ERROR/ABORTED), runStartedAt duration, skip unauth/unsaved, never block simulator | FEATURE | A10 | ⬜ | |
   REQ-031 | p.51-52 §8.5; p.53 §9.2 | Frontend tests: api.test.ts, persist.test.ts, rem assembler tests in existing harness | TEST | A11 | ⬜ | | authored by A02/A03/A05; A11 verifies completeness
-  REQ-032 | p.24-25 D6 | MySnippetsDrawer: /mine list w/ title/updated/visibility badge, click-to-load, edit-in-place title, delete w/ confirm, New Snippet button, currentSnippetId persists | FEATURE | A09 | ⬜ | |
-  REQ-033 | p.25 D7 | Public feed: paginated browser (title/owner/updated, Prev/Next/page) + 'See public snippets' discovery link in drawer empty state | FEATURE | A09 | ⬜ | |
+  REQ-032 | p.24-25 D6 | MySnippetsDrawer: /mine list w/ title/updated/visibility badge, click-to-load, edit-in-place title, delete w/ confirm, New Snippet button, currentSnippetId persists | FEATURE | A09 | IMPLEMENTED | #49 | MySnippetsDrawer.tsx; live+mock evidence in A-09
+  REQ-033 | p.25 D7 | Public feed: paginated browser (title/owner/updated, Prev/Next/page) + 'See public snippets' discovery link in drawer empty state | FEATURE | A09 | IMPLEMENTED | #49 | PublicFeed.tsx; live+mock evidence in A-09
   REQ-034 | p.26 D8 | HistoryPanel tab in right inspector: Recent Runs (color-coded status, duration, timestamp) + Most Run (count, last run); click loads snippet | FEATURE | A10 | ⬜ | |
   REQ-035 | p.26-27 D9 | Empty states w/ exact copy: drawer 'Save your first snippet…', history 'Run a saved snippet…', feed 'No public snippets yet. Be the first.' | UI/UX | A11 | ⬜ | |
   REQ-036 | p.27 D9 | Confirm dialogs for deletes: 'Delete <title>? This cannot be undone.' [Cancel][Delete] | UI/UX | A11 | ⬜ | |
