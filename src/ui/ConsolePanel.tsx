@@ -71,7 +71,7 @@ export function ConsolePanel() {
   const showJumpToBottom = !atBottom && hasContent
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div data-magnify-region className="flex h-full min-h-0 flex-col">
       {/* Header (24px): Clear / Copy + filter */}
       <div
         className="flex h-6 flex-none items-center gap-2 border-b border-divider px-2 font-mono text-[10px] uppercase text-ink-3"

@@ -13,7 +13,7 @@ import { cn } from '../cn.ts'
 // tool is open but the user isn't interested.
 
 const CELL_SIZE_OPTIONS = [1, 2, 4, 8, 16, 32] as const
-const DIMENSION_OPTIONS = [32, 64, 128, 256] as const
+const DIMENSION_OPTIONS = [8, 16, 32, 64, 128, 256] as const
 
 const DEFAULT_BASE = 0x10010000
 

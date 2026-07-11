@@ -271,7 +271,7 @@ export function MemoryPanel() {
   }
 
   return (
-    <div className="space-y-2">
+    <div data-magnify-region className="space-y-2">
       {/* Header: segment buttons + base address input */}
       <div className="flex flex-wrap items-center gap-2">
         <div role="group" aria-label="Memory segment" className="inline-flex overflow-hidden rounded-md border border-divider">
