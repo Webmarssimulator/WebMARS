@@ -4,6 +4,8 @@ import { cn } from './cn.ts'
 import { RegisterTable } from './RegisterTable.tsx'
 import { FpuRegisterTable } from './FpuRegisterTable.tsx'
 import { MemoryPanel } from './MemoryPanel.tsx'
+import { MySnippetsDrawer } from './MySnippetsDrawer.tsx'
+import { PublicFeed } from './PublicFeed.tsx'
 
 interface AccordionSectionProps {
   title: string
@@ -100,6 +102,14 @@ export function RightPanel() {
 
       <AccordionSection title="Memory" defaultOpen={false}>
         <MemoryPanel />
+      </AccordionSection>
+
+      <AccordionSection title="My Snippets" defaultOpen={false}>
+        <MySnippetsDrawer />
+      </AccordionSection>
+
+      <AccordionSection title="Public Snippets" defaultOpen={false}>
+        <PublicFeed />
       </AccordionSection>
 
       <AccordionSection title="Watches" futureSubAgent="SA-11">
