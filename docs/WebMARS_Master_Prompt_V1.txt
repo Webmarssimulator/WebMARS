@@ -168,7 +168,7 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   AGENT 09 — My Snippets Drawer + Public Feed ................... ✅ COMPLETE
   AGENT 10 — Run History: Logging Hook + HistoryPanel ........... ✅ COMPLETE
   AGENT 11 — Polish, A11y, Docs, Tests Completion, v1.3 Issues .. ✅ COMPLETE
-  AGENT 12 — Backend: Verification + Gap PR from Fork ........... ⬜ NOT STARTED
+  AGENT 12 — Backend: Verification + Gap PR from Fork ........... ✅ COMPLETE
   ──────────────────────────────────────────────────────────────────────────────
 
   AGENT 90 — Cross-Cutting Quality Sweep ........................ ⬜ NOT STARTED
@@ -284,7 +284,17 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   older 'AI tools used' section — AGENT 93 replaces it with the verbatim
   standard text (Acknowledgements currently sits AFTER License, so the
   disclosure stays at the bottom per the placement rule's fallback).
-  PR #61.
+  PR #61 merged, main @ e747657.
+  ------------------------------------------------------------------------------
+  [2026-07-10] AGENT 12: backend done. Fork PR OPEN:
+  https://github.com/landclay715/webmars-api/pull/24 (SnippetResponse
+  DTO fixing ALL production 500s, PUT /snippets/{id}, Retry-After,
+  26-test Testcontainers suite + 5 unit JwtUtil tests passing locally;
+  compile exit 0). 9 backend REQs verified IMPLEMENTED on upstream main;
+  6 ⛔ BLOCKED on ONE owner action (Landon merges #24 + ./mvnw verify +
+  Railway redeploy) plus REQ-005's history scrub (old DB password still
+  reachable at 8afb44c/8a6cf1e — §7.1 filter-repo steps; force-push is
+  owner-approved-only). Frontend doc PR #62.
   ------------------------------------------------------------------------------
 
 ================================================================================
@@ -1090,8 +1100,76 @@ APPENDIX A-11 — Polish, A11y, Docs, Tests, Issues
   PR # / MAIN COMMIT: PR #61.
 --------------------------------------------------------------------------------
 APPENDIX A-12 — Backend Verification + Gap PR
-  STATUS: / DATE: / PER-REQ (003/004/005/010/011/012/013/014/015/016/024/
-  025/026/027/041): / FORK PR URL: / BUILD: / BLOCKED: / PR #:
+  STATUS: ✅ COMPLETE (owner-gated items ⛔ listed) / DATE: 2026-07-10
+  UPSTREAM PR (fork BryanD17/webmars-api, branch
+    fix/v1.2-gaps-snippet-dto-put-tests, 2 commits, both authored Bryan
+    Djenabia <bdjenabia5@gmail.com>):
+    https://github.com/landclay715/webmars-api/pull/24
+    Contents: SnippetResponse DTO (JSON shape preserved) + fetch-join
+    repository queries → fixes ALL production 500s (GET by id, populated
+    /public + /mine, DELETE, POST /runs private, /runs/recent w/ rows);
+    NEW PUT /snippets/{id} + UpdateSnippetRequest; RateLimitFilter
+    Retry-After + configurable limits; Testcontainers suite
+    (PostgresTestBase + Auth 6 + Snippet 10 + Run 5 tests) incl.
+    regression pins for every observed 500; JwtUtilTest (5, plain unit);
+    pom: testcontainers BOM 1.20.4 + spring-boot-webmvc-test (Boot 4
+    moved AutoConfigureMockMvc to o.s.boot.webmvc.test.autoconfigure);
+    backend README v1.3 refresh-token note.
+  LOCAL BUILD: ./mvnw compile test-compile → exit 0 (Java 21 Temurin);
+    ./mvnw test -Dtest=JwtUtilTest → Tests run: 5, Failures: 0.
+    Integration tests need Docker (absent here, SF4) → reviewer runs
+    ./mvnw verify.
+  PER-REQ:
+    REQ-004: IMPLEMENTED (pre-existing) — AuthController 401 'Invalid
+      credentials' both branches (file) + observed live 401 (A-07 log).
+    REQ-010: IMPLEMENTED — JwtUtil.java 1000*60*60*8 (file); v1.3 note
+      shipped via PR #24.
+    REQ-011: IMPLEMENTED (pre-existing) — SecurityConfig CORS: localhost
+      5173/5174 + webmarsimulator.com both variants, no wildcards
+      (file); proven live by every browser call this run.
+    REQ-012: IMPLEMENTED (pre-existing) — Flyway V1__init/V2__snippet_
+      ownership/V3__runs/V4__fix_schema, IF NOT EXISTS idempotency,
+      V4 as a corrective migration (D9 discipline); schema matches plan
+      §3.4; live DB migrated (API serves).
+    REQ-013: IMPLEMENTED (pre-existing) — starter-validation in pom;
+      Jakarta annotations on DTOs (RegisterRequest @Size/@Pattern,
+      SaveSnippetRequest, LogRunRequest); GlobalExceptionHandler maps
+      validation→400 field map, DataIntegrity→409, RSE→status,
+      generic→500 no stack leak (file); live 400 observed (A-07).
+    REQ-016: IMPLEMENTED (pre-existing) — .env.example committed; git
+      ls-files shows NO tracked .env.
+    REQ-024: IMPLEMENTED (pre-existing) — Snippet entity: LAZY owner FK,
+      STRING enum visibility, created/updated + @PrePersist/@PreUpdate.
+    REQ-025: IMPLEMENTED (pre-existing) — Run entity + RunRepository
+      most-run interface projection.
+    REQ-041: IMPLEMENTED (pre-existing) — backend README rewritten for
+      v1.2 (endpoints/env/Railway deploy/live URL sections verified).
+    REQ-003: ⛔ BLOCKED — owner-check code pre-exists but returns 500
+      LIVE (lazy owner); fixed in PR #24. ACTION: Landon reviews+merges
+      landclay715/webmars-api#24, runs ./mvnw verify, redeploys Railway.
+    REQ-014: ⛔ BLOCKED — limiter live (5 login/15min, 10 register/hr,
+      429) but keyed per-IP (plan said per-username for login) and NO
+      Retry-After upstream; Retry-After + configurability in PR #24.
+      Same ACTION as above. [Per-username login keying noted as a
+      follow-up in the PR body.]
+    REQ-015: ⛔ BLOCKED — Testcontainers suite authored+compiling in PR
+      #24; execution requires Docker. ACTION: merge #24 + ./mvnw verify
+      in CI/reviewer machine.
+    REQ-026: ⛔ BLOCKED — PUT missing upstream + reads 500 live; full
+      DTO rewrite in PR #24. Same ACTION.
+    REQ-027: ⛔ BLOCKED — POST/most-run OK upstream, POST-private +
+      /recent 500 live; fixed in PR #24. Same ACTION.
+    REQ-005: ⛔ BLOCKED (partial) — IMPLEMENTED upstream: env-var
+      indirection (application.properties), JwtUtil @Value + ≥32-byte
+      validation, .env.example, .env untracked, old JWT secret absent
+      from all history (git log -S → no hits). REMAINING OWNER ACTIONS:
+      (1) the old DB password IS STILL IN HISTORY — git log -S 'JHP715…'
+      hits commits 8afb44c and 8a6cf1e → Landon must run the plan §7.1
+      scrub (git filter-repo --replace-text + force-push + team
+      re-clone) — force-push is owner-approved-only per R6/H6; (2)
+      confirm the Railway production DB password differs from the
+      leaked value / rotate it.
+  PR # / MAIN COMMIT (this doc update): PR #62.
 --------------------------------------------------------------------------------
 (APPENDIX A blocks for agents 90–94 are filled as those agents complete,
 using the A-90..A-94 field lists from the source master prompt.)
@@ -1109,20 +1187,20 @@ the exact owner action. At AGENT 94 exit: zero ⬜, zero 🔄.
   --------|------------------|---------|----------|-------|--------|------|---------
   REQ-001 | p.5-6 §2.1; p.32 §6.2 | Persist editor source/files/activeFileId across refresh; simulator state NOT persisted; private-mode safe; last-write-wins OK [mechanism per codebase convention, SF5] | FIX | A03 | IMPLEMENTED | #43 | useSimulator.ts workspace helpers + subscribe; persist.test.ts (4 tests)
   REQ-002 | p.6-7 §2.2; p.33-34 §6.3 | Monaco webmars-light theme; theme preference incl. 'system' w/ live OS tracking; SettingsDialog picker; shell+editor stay in sync [hc keeps dark Monaco] | FIX | A04 | IMPLEMENTED | #44 | mipsLanguage.ts webmars-light; browser-verified bg #0a0a0a→#ffffff; A-04
-  REQ-003 | p.7-8 §2.3 | Backend: DELETE /snippets/{id} owner check, 404 to non-owners | SECURITY | A12 | ⬜ | | pre-exists upstream (verify)
-  REQ-004 | p.8 §2.4 | Backend: login failures return 401 'Invalid credentials' (same msg both cases) | FIX | A12 | ⬜ | | pre-exists upstream (verify)
-  REQ-005 | p.8-9 §2.5; p.38 §7.1; p.56 §10.1 | Backend secrets: env-var indirection, .env.example, .gitignore, rotation, git-history scrub + force-push + re-clone | SECURITY | A12 | ⬜ | | partial upstream; rotation/scrub = owner
+  REQ-003 | p.7-8 §2.3 | Backend: DELETE /snippets/{id} owner check, 404 to non-owners | SECURITY | A12 | ⛔ BLOCKED | — | code pre-exists but 500s LIVE (lazy owner); fixed in webmars-api#24 — Landon: merge + ./mvnw verify + redeploy
+  REQ-004 | p.8 §2.4 | Backend: login failures return 401 'Invalid credentials' (same msg both cases) | FIX | A12 | IMPLEMENTED | up#e2a080f | AuthController.java both branches; live 401 observed (A-07)
+  REQ-005 | p.8-9 §2.5; p.38 §7.1; p.56 §10.1 | Backend secrets: env-var indirection, .env.example, .gitignore, rotation, git-history scrub + force-push + re-clone | SECURITY | A12 | ⛔ BLOCKED | — | env indirection/JwtUtil validation/.env untracked DONE upstream; OWNER: old DB password still in history (commits 8afb44c, 8a6cf1e) → run §7.1 filter-repo scrub + force-push + re-clone, and rotate/confirm Railway DB password
   REQ-006 | p.9 §2.6; p.46-48 §8.2 | ScreenMagnifier rewrite: DOM-clone loupe 240x160 @2x, hint state, Escape, no per-mousemove reclone, Monaco excluded | FEATURE | A06 | IMPLEMENTED | #46 | ScreenMagnifier.tsx rewrite; browser-verified clone/hint/Escape
   REQ-007 | p.10 §2.7; p.20 D1 | Toast system via sonner; Toaster at App root; error/success toasts for API calls | UI/UX | A02 | IMPLEMENTED | #42 | src/App.tsx (Toaster mount); A-02
   REQ-008 | p.10 §2.8 | Loading state on every async button: disabled + spinner/label while in flight; no duplicate submits | UI/UX | A90 | ⬜ | | implemented inline by A07-A10; A90 sweeps
   REQ-009 | p.10-11 §2.9; p.36 §6.6; p.23 D5 | ?snippet=<id> on boot loads snippet into editor; 404 → toast + default example; document title updated | FEATURE | A08 | IMPLEMENTED | #48 | App.tsx useSnippetDeepLink; live 404-toast + fallback verified (A-08)
-  REQ-010 | p.11 §2.10; p.26 D8 | JWT expiry 8h (sprint choice) + README v1.3 note re refresh tokens | FIX | A12 | ⬜ | | 8h pre-exists (verify note)
-  REQ-011 | p.11 §2.11; p.39 §7.2; p.56 §10.1 | CORS: prod + localhost origins, methods, headers, credentials, no wildcards | FIX | A12 | ⬜ | | pre-exists upstream (verify)
-  REQ-012 | p.12-14 §3.2-3.4 | Flyway versioned migrations; final schema users/snippets(owner,visibility,updated_at,indexes)/runs(indexes) | INFRA | A12 | ⬜ | | V1-V4 pre-exist (verify contents)
-  REQ-013 | p.12 §3.2; p.21 D2 | Request validation: spring-boot-starter-validation + Jakarta annotations on DTOs; JSON 400 field map | SECURITY | A12 | ⬜ | | pre-exists (verify)
-  REQ-014 | p.12 §3.2; p.26 D8; p.56 §10.1 | Rate limiting /auth/**: 5 login/user/15min, 10 register/IP/hr, 429 + Retry-After [upstream hand-rolled, not Bucket4j — verify behavior] | SECURITY | A12 | ⬜ | | pre-exists (verify)
-  REQ-015 | p.12 §3.2; p.49-51 §8.4; p.53 §9.1 | Testcontainers integration tests: PostgresTestBase + Auth/Snippet/Run/JwtUtil test classes per §9.1 scenario table | TEST | A12 | ⬜ | | MISSING upstream → fork PR; not executable locally (SF4)
-  REQ-016 | p.13 §3.3 | Backend .env.example documents required vars; .gitignore excludes .env | INFRA | A12 | ⬜ | | pre-exists (verify)
+  REQ-010 | p.11 §2.10; p.26 D8 | JWT expiry 8h (sprint choice) + README v1.3 note re refresh tokens | FIX | A12 | IMPLEMENTED | up#e2a080f | JwtUtil.java 8h verified; v1.3 note ships in webmars-api#24
+  REQ-011 | p.11 §2.11; p.39 §7.2; p.56 §10.1 | CORS: prod + localhost origins, methods, headers, credentials, no wildcards | FIX | A12 | IMPLEMENTED | up#e2a080f | SecurityConfig.java verified; proven live by all browser calls this run
+  REQ-012 | p.12-14 §3.2-3.4 | Flyway versioned migrations; final schema users/snippets(owner,visibility,updated_at,indexes)/runs(indexes) | INFRA | A12 | IMPLEMENTED | up#e2a080f | V1–V4 verified idempotent + plan-schema match; V4 corrective (D9)
+  REQ-013 | p.12 §3.2; p.21 D2 | Request validation: spring-boot-starter-validation + Jakarta annotations on DTOs; JSON 400 field map | SECURITY | A12 | IMPLEMENTED | up#e2a080f | pom + DTO annotations + GlobalExceptionHandler verified; live 400 observed (A-07)
+  REQ-014 | p.12 §3.2; p.26 D8; p.56 §10.1 | Rate limiting /auth/**: 5 login/user/15min, 10 register/IP/hr, 429 + Retry-After [upstream hand-rolled, not Bucket4j — verify behavior] | SECURITY | A12 | ⛔ BLOCKED | — | limiter live but per-IP for login + no Retry-After; Retry-After + config in webmars-api#24 — Landon: merge + redeploy (per-username keying noted as follow-up)
+  REQ-015 | p.12 §3.2; p.49-51 §8.4; p.53 §9.1 | Testcontainers integration tests: PostgresTestBase + Auth/Snippet/Run/JwtUtil test classes per §9.1 scenario table | TEST | A12 | ⛔ BLOCKED | — | 26 tests authored+compiling in webmars-api#24; JwtUtil 5/5 pass locally; integration needs Docker — Landon: merge + ./mvnw verify
+  REQ-016 | p.13 §3.3 | Backend .env.example documents required vars; .gitignore excludes .env | INFRA | A12 | IMPLEMENTED | up#e2a080f | .env.example committed; git ls-files → no .env tracked
   REQ-017 | p.15-16 §3.6.1; p.27-28 D10 | Backend deployed w/ env vars + Flyway migrations + JPA validate [Render→Railway substitution made by team] | INFRA | A92 | ⬜ | | live (verify + record)
   REQ-018 | p.16 §3.6.2; p.20 D1 | Frontend env-aware API base: VITE_API_BASE w/ localhost fallback; .env.local.example | INFRA | A02 | IMPLEMENTED | #42 | src/lib/api.ts:6; .env.local.example
   REQ-019 | p.16 §3.6.2; p.27 D10; p.56 §10.1 | Vercel env var VITE_API_BASE set + production redeploy + deployed-combo CORS check | INFRA | A92 | ⬜ | | dashboard = owner unless CLI authed
@@ -1131,10 +1209,10 @@ the exact owner action. At AGENT 94 exit: zero ⬜, zero 🔄.
   REQ-002-EXT-1 | (Q2 of REQ-002) | Mobile drawer theme list gains the System option (second theme-picker instance) | FIX | A07 | IMPLEMENTED | #47 | MobileShell.tsx theme section
   REQ-022 | p.36 §6.5; p.23 D5 | Save-to-Account + ShareModal: create-vs-update semantics, copy link + toast, visibility shown + toggle → PUT | FEATURE | A08 | IMPLEMENTED | #48 | SaveSnippetDialog/ShareModal/Toolbar; live save+copy verified; PUT graceful until A12 fix deploys
   REQ-023 | p.44-45 §7.7; p.22-24 D4-D5 | rem pseudo-instruction: lexer mnemonic, parser ["R","R","R"], assembler div+mfhi expansion [live assembler is instructions.ts; PDF-named files also updated] | FEATURE | A05 | IMPLEMENTED | #45 | instructions.ts rem case; pseudoInstructions.test.ts +4 tests
-  REQ-024 | p.40 §7.3; p.24 D5 | Snippet entity v1.2: owner FK lazy, Visibility enum STRING, created/updated timestamps + lifecycle hooks | FEATURE | A12 | ⬜ | | pre-exists (verify)
-  REQ-025 | p.40-42 §7.4; p.24 D6 | Run entity + RunRepository: findByUserIdOrderByStartedAtDesc + most-run JPQL projection | FEATURE | A12 | ⬜ | | pre-exists (verify)
-  REQ-026 | p.42-43 §7.5; p.24 D6 | SnippetController v1.2: visibility-gated GET, /mine, /public paginated (size cap 100), /save sets owner, PUT update, DELETE owner-checked | FEATURE | A12 | ⬜ | | PUT missing upstream → fork PR
-  REQ-027 | p.43-44 §7.6; p.25 D7 | RunController: POST /runs (user from JWT, never from body), GET /runs/recent, GET /runs/most-run, limit caps [+upstream audit C2: add visibility check on POST] | FEATURE | A12 | ⬜ | | pre-exists; C2 fix → fork PR
+  REQ-024 | p.40 §7.3; p.24 D5 | Snippet entity v1.2: owner FK lazy, Visibility enum STRING, created/updated timestamps + lifecycle hooks | FEATURE | A12 | IMPLEMENTED | up#e2a080f | Snippet.java verified field-by-field
+  REQ-025 | p.40-42 §7.4; p.24 D6 | Run entity + RunRepository: findByUserIdOrderByStartedAtDesc + most-run JPQL projection | FEATURE | A12 | IMPLEMENTED | up#e2a080f | Run.java + RunRepository projection verified; most-run 200 live w/ real data (A-10)
+  REQ-026 | p.42-43 §7.5; p.24 D6 | SnippetController v1.2: visibility-gated GET, /mine, /public paginated (size cap 100), /save sets owner, PUT update, DELETE owner-checked | FEATURE | A12 | ⛔ BLOCKED | — | PUT + DTO rewrite in webmars-api#24 (reads currently 500 live) — Landon: merge + verify + redeploy
+  REQ-027 | p.43-44 §7.6; p.25 D7 | RunController: POST /runs (user from JWT, never from body), GET /runs/recent, GET /runs/most-run, limit caps [+upstream audit C2: add visibility check on POST] | FEATURE | A12 | ⛔ BLOCKED | — | POST-public + most-run work live (A-10); POST-private + /recent 500 → fixed in webmars-api#24 — same owner action
   REQ-028 | p.46 §8.1; p.20 D1 | BitmapDisplay DIMENSION_OPTIONS gains 8 and 16; existing sizes unaffected | FEATURE | A06 | IMPLEMENTED | #46 | BitmapDisplay.tsx:16; browser-verified option list
   REQ-029 | p.47 §8.2; p.21 D2 | data-magnify-region on RegisterTable, MemoryPanel, ConsolePanel, StatusBar, FpuRegisterTable (+small-text panels); Monaco excluded | FEATURE | A06 | IMPLEMENTED | #46 | 8 panels tagged; A-06
   REQ-030 | p.49 §8.3; p.25 D6 | Run-logging hook: fire-and-forget at run end (COMPLETED/ERROR/ABORTED), runStartedAt duration, skip unauth/unsaved, never block simulator | FEATURE | A10 | IMPLEMENTED | #50 | useSimulator logRunIfPossible; live anonymous-skip + authed-POST evidence in A-10
@@ -1148,7 +1226,7 @@ the exact owner action. At AGENT 94 exit: zero ⬜, zero 🔄.
   REQ-038 | p.27 D9 | Browser back/forward between /?snippet=N and / restores snippet state (popstate) | FIX | A08 | IMPLEMENTED | #48 | popstate handler in App.tsx; clear verified live; restore blocked by upstream 500 (A91 re-verifies post-A12)
   REQ-039 | p.27 D9 | New modals usable below 768px (mobile spot-check) | UI/UX | A11 | IMPLEMENTED | #61 | 375px fit + no h-scroll verified (A-11); touch-target height → A90
   REQ-040 | p.27 D9 | Frontend README rewritten for v1.2 surface: features, env vars, run + deploy instructions | DOCS | A11 | IMPLEMENTED | #61 | README.md v1.2 + env-vars sections
-  REQ-041 | p.27 D9 | Backend README rewritten for v1.2: endpoints, env vars, deployment | DOCS | A12 | ⬜ | | pre-exists upstream (verify)
+  REQ-041 | p.27 D9 | Backend README rewritten for v1.2: endpoints, env vars, deployment | DOCS | A12 | IMPLEMENTED | up#e2a080f | README sections verified (features/env/endpoints/Railway/live URL); v1.3 note added via webmars-api#24
   REQ-042 | p.27 D9; p.24 D5 | HelpDialog: rem entry, magnifier docs (+which panels + Monaco limitation), bitmap 8x8/16x16, theme options note | DOCS | A11 | IMPLEMENTED | #61 | rem row (#45) + Tools section (#46); no theme shortcut exists to document
   REQ-043 | p.27 D10; p.56 §10.1 | Pre-deploy gates: npm run lint / typecheck / test / build all clean on main; bundle-size review (no heavy accidental deps) | TEST | A92 | ⬜ | |
   REQ-044 | p.27-28 D10; p.56-57 §10.2 | Production deploy of integrated frontend + live smoke test (register→save→share→run→history on webmarsimulator.com) | INFRA | A92 | ⬜ | | Vercel deploy = owner unless CLI authed; smoke test follows
