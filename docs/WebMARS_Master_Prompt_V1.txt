@@ -167,7 +167,7 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   AGENT 08 — Save, Share & Deep Links (?snippet=<id>) ........... ✅ COMPLETE
   AGENT 09 — My Snippets Drawer + Public Feed ................... ✅ COMPLETE
   AGENT 10 — Run History: Logging Hook + HistoryPanel ........... ✅ COMPLETE
-  AGENT 11 — Polish, A11y, Docs, Tests Completion, v1.3 Issues .. ⬜ NOT STARTED
+  AGENT 11 — Polish, A11y, Docs, Tests Completion, v1.3 Issues .. ✅ COMPLETE
   AGENT 12 — Backend: Verification + Gap PR from Fork ........... ⬜ NOT STARTED
   ──────────────────────────────────────────────────────────────────────────────
 
@@ -274,7 +274,17 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   never POST; authed run POSTs; Most Run shows real production data;
   Recent Runs isolates its upstream-500 error with Retry. Upstream bug
   matrix completed: POST /runs private→500 public→200; recent→500 w/
-  rows; most-run→200. 138/138 green. PR #50.
+  rows; most-run→200. 138/138 green. PR #50 merged, main @ 7e2825a.
+  ------------------------------------------------------------------------------
+  [2026-07-10] AGENT 11: polish/docs/issues done. README v1.2 sections;
+  focus-trap/Escape/Enter verified live; 375px modal fit verified (touch
+  -target height finding → A90); test suite complete (13 new tests over
+  A02/03/05); HelpDialog complete; issues #51–60 labeled v1.3. REQ-047
+  demo video = ⛔ owner (exact ask in A-11). NOTE: README already has an
+  older 'AI tools used' section — AGENT 93 replaces it with the verbatim
+  standard text (Acknowledgements currently sits AFTER License, so the
+  disclosure stays at the bottom per the placement rule's fallback).
+  PR #61.
   ------------------------------------------------------------------------------
 
 ================================================================================
@@ -1035,8 +1045,49 @@ APPENDIX A-10 — Run History
   PR # / MAIN COMMIT: PR #50.
 --------------------------------------------------------------------------------
 APPENDIX A-11 — Polish, A11y, Docs, Tests, Issues
-  STATUS: / DATE: / PER-REQ (031/035/036/037/039/040/042/046/047): /
-  BUILD+TEST: / PR #:
+  STATUS: ✅ COMPLETE / DATE: 2026-07-10
+  REQ-031: IMPLEMENTED — test-completeness audit: api.test.ts (5 tests,
+    A02), persist.test.ts (4, A03), rem tests in pseudoInstructions
+    .test.ts (4, A05 — repo's pseudo-op home, per-convention substitute
+    for a new assembler.test.ts). Suite 138/138.
+  REQ-035: IMPLEMENTED — exact empty copy shipped + verified live:
+    drawer 'Save your first snippet to see it here.' (A-09 live), feed
+    'No public snippets yet. Be the first.' (PublicFeed.tsx), history
+    'Run a saved snippet to see your history here.' (A-10 live).
+  REQ-036: IMPLEMENTED — ConfirmDialog.tsx (A09) with verbatim copy
+    'Delete <title>? This cannot be undone.' [Cancel][Delete] — copy
+    string verified in the mock walk (A-09).
+  REQ-037: IMPLEMENTED + VERIFIED LIVE — AuthModal: initial focus on the
+    username input; 12 consecutive Tabs stay inside the dialog;
+    Shift+Tab wraps inside; Escape closes; Enter submits (used
+    throughout the A-07/A-08 live flows). Same trap implementation in
+    SaveSnippetDialog/ShareModal/ConfirmDialog.
+  REQ-039: IMPLEMENTED + VERIFIED — 375px viewport: AuthModal 343px wide,
+    fully inside the viewport, no horizontal scroll (scrollWidth <=
+    innerWidth). Finding routed to A90: modal button touch-target height
+    is ~27px (<44px C8 floor on touch layouts).
+  REQ-040: IMPLEMENTED — README.md: new 'Accounts, snippets & sharing
+    (v1.2)' usage section (auth rules, save/share, inspector sections,
+    persistence note, cold-start warning) + 'Environment variables'
+    developer section (VITE_API_BASE table, .env.local.example, Vercel
+    note, backend repo link).
+  REQ-042: IMPLEMENTED — HelpDialog completeness: rem row renders in the
+    Pseudo-Instructions tab (INSTRUCTION_ENTRIES, A05); Tools section in
+    About covers magnifier (panels + Monaco limitation + OS zoom) and
+    bitmap 8×8–256×256 (A06). Theme-toggle shortcut: none exists in the
+    keybinding map → nothing to document (checked commands.ts).
+  REQ-046: IMPLEMENTED — GitHub issues #51–#60 created with label v1.3
+    (refresh tokens, email+reset, versioning, comments, forking,
+    curation, profiles, snippet rate limits, GitHub OAuth, Monaco
+    magnifier) — one per §10.4 item, backend-flavored ones name
+    landclay715/webmars-api in-body.
+  REQ-047: ⛔ BLOCKED (owner-only) — demo video/gif + team announcement:
+    requires recording a screen capture and posting to the course
+    channel. EXACT ASK: record the §10.2 flow (editor → save → share →
+    incognito open → run → history) and post 'WebMARS v1.2 is live' with
+    the clip. Note: README already embeds a v1.0/1.1 YouTube demo.
+  BUILD+TEST: typecheck 0 / lint 0 / build exit 0 / vitest 138/138.
+  PR # / MAIN COMMIT: PR #61.
 --------------------------------------------------------------------------------
 APPENDIX A-12 — Backend Verification + Gap PR
   STATUS: / DATE: / PER-REQ (003/004/005/010/011/012/013/014/015/016/024/
@@ -1087,23 +1138,23 @@ the exact owner action. At AGENT 94 exit: zero ⬜, zero 🔄.
   REQ-028 | p.46 §8.1; p.20 D1 | BitmapDisplay DIMENSION_OPTIONS gains 8 and 16; existing sizes unaffected | FEATURE | A06 | IMPLEMENTED | #46 | BitmapDisplay.tsx:16; browser-verified option list
   REQ-029 | p.47 §8.2; p.21 D2 | data-magnify-region on RegisterTable, MemoryPanel, ConsolePanel, StatusBar, FpuRegisterTable (+small-text panels); Monaco excluded | FEATURE | A06 | IMPLEMENTED | #46 | 8 panels tagged; A-06
   REQ-030 | p.49 §8.3; p.25 D6 | Run-logging hook: fire-and-forget at run end (COMPLETED/ERROR/ABORTED), runStartedAt duration, skip unauth/unsaved, never block simulator | FEATURE | A10 | IMPLEMENTED | #50 | useSimulator logRunIfPossible; live anonymous-skip + authed-POST evidence in A-10
-  REQ-031 | p.51-52 §8.5; p.53 §9.2 | Frontend tests: api.test.ts, persist.test.ts, rem assembler tests in existing harness | TEST | A11 | ⬜ | | authored by A02/A03/A05; A11 verifies completeness
+  REQ-031 | p.51-52 §8.5; p.53 §9.2 | Frontend tests: api.test.ts, persist.test.ts, rem assembler tests in existing harness | TEST | A11 | IMPLEMENTED | #61 | 13 tests across #42/#43/#45; suite 138/138
   REQ-032 | p.24-25 D6 | MySnippetsDrawer: /mine list w/ title/updated/visibility badge, click-to-load, edit-in-place title, delete w/ confirm, New Snippet button, currentSnippetId persists | FEATURE | A09 | IMPLEMENTED | #49 | MySnippetsDrawer.tsx; live+mock evidence in A-09
   REQ-033 | p.25 D7 | Public feed: paginated browser (title/owner/updated, Prev/Next/page) + 'See public snippets' discovery link in drawer empty state | FEATURE | A09 | IMPLEMENTED | #49 | PublicFeed.tsx; live+mock evidence in A-09
   REQ-034 | p.26 D8 | HistoryPanel tab in right inspector: Recent Runs (color-coded status, duration, timestamp) + Most Run (count, last run); click loads snippet | FEATURE | A10 | IMPLEMENTED | #50 | HistoryPanel.tsx; live Most-Run real data + per-section states in A-10
-  REQ-035 | p.26-27 D9 | Empty states w/ exact copy: drawer 'Save your first snippet…', history 'Run a saved snippet…', feed 'No public snippets yet. Be the first.' | UI/UX | A11 | ⬜ | |
-  REQ-036 | p.27 D9 | Confirm dialogs for deletes: 'Delete <title>? This cannot be undone.' [Cancel][Delete] | UI/UX | A11 | ⬜ | |
-  REQ-037 | p.27 D9 | AuthModal/ShareModal/confirm dialogs: focus trap, Escape closes, Enter submits | UI/UX | A11 | ⬜ | |
+  REQ-035 | p.26-27 D9 | Empty states w/ exact copy: drawer 'Save your first snippet…', history 'Run a saved snippet…', feed 'No public snippets yet. Be the first.' | UI/UX | A11 | IMPLEMENTED | #61 | shipped in #49/#50; drawer+history verified LIVE (A-09/A-10)
+  REQ-036 | p.27 D9 | Confirm dialogs for deletes: 'Delete <title>? This cannot be undone.' [Cancel][Delete] | UI/UX | A11 | IMPLEMENTED | #61 | ConfirmDialog.tsx (#49); copy verified verbatim (A-09)
+  REQ-037 | p.27 D9 | AuthModal/ShareModal/confirm dialogs: focus trap, Escape closes, Enter submits | UI/UX | A11 | IMPLEMENTED | #61 | live keyboard walk in A-11 (trap/Shift+Tab/Escape/Enter)
   REQ-038 | p.27 D9 | Browser back/forward between /?snippet=N and / restores snippet state (popstate) | FIX | A08 | IMPLEMENTED | #48 | popstate handler in App.tsx; clear verified live; restore blocked by upstream 500 (A91 re-verifies post-A12)
-  REQ-039 | p.27 D9 | New modals usable below 768px (mobile spot-check) | UI/UX | A11 | ⬜ | |
-  REQ-040 | p.27 D9 | Frontend README rewritten for v1.2 surface: features, env vars, run + deploy instructions | DOCS | A11 | ⬜ | |
+  REQ-039 | p.27 D9 | New modals usable below 768px (mobile spot-check) | UI/UX | A11 | IMPLEMENTED | #61 | 375px fit + no h-scroll verified (A-11); touch-target height → A90
+  REQ-040 | p.27 D9 | Frontend README rewritten for v1.2 surface: features, env vars, run + deploy instructions | DOCS | A11 | IMPLEMENTED | #61 | README.md v1.2 + env-vars sections
   REQ-041 | p.27 D9 | Backend README rewritten for v1.2: endpoints, env vars, deployment | DOCS | A12 | ⬜ | | pre-exists upstream (verify)
-  REQ-042 | p.27 D9; p.24 D5 | HelpDialog: rem entry, magnifier docs (+which panels + Monaco limitation), bitmap 8x8/16x16, theme options note | DOCS | A11 | ⬜ | | contributions land in A04/A05/A06; A11 completes
+  REQ-042 | p.27 D9; p.24 D5 | HelpDialog: rem entry, magnifier docs (+which panels + Monaco limitation), bitmap 8x8/16x16, theme options note | DOCS | A11 | IMPLEMENTED | #61 | rem row (#45) + Tools section (#46); no theme shortcut exists to document
   REQ-043 | p.27 D10; p.56 §10.1 | Pre-deploy gates: npm run lint / typecheck / test / build all clean on main; bundle-size review (no heavy accidental deps) | TEST | A92 | ⬜ | |
   REQ-044 | p.27-28 D10; p.56-57 §10.2 | Production deploy of integrated frontend + live smoke test (register→save→share→run→history on webmarsimulator.com) | INFRA | A92 | ⬜ | | Vercel deploy = owner unless CLI authed; smoke test follows
   REQ-045 | p.57 §10.3 | Risk mitigations w/ artifacts: secret-pattern scan (pre-commit/CI), README cold-start note, managed-Postgres expiry reminder note [Railway equivalent] | SECURITY | A92 | ⬜ | |
-  REQ-046 | p.58 §10.4 | v1.3 backlog → GitHub issues tagged v1.3 (10 items: refresh tokens, email+reset, versioning, comments, forking, curation, profiles, snippet rate limits, GitHub OAuth, Monaco magnifier) | DOCS | A11 | ⬜ | |
-  REQ-047 | p.28 D10; p.57 §10.2 | Demo video/gif + team announcement post | OTHER | A11 | ⬜ | | owner-only (cannot record video) → ⛔ expected
+  REQ-046 | p.58 §10.4 | v1.3 backlog → GitHub issues tagged v1.3 (10 items: refresh tokens, email+reset, versioning, comments, forking, curation, profiles, snippet rate limits, GitHub OAuth, Monaco magnifier) | DOCS | A11 | IMPLEMENTED | #61 | issues #51–#60, label v1.3
+  REQ-047 | p.28 D10; p.57 §10.2 | Demo video/gif + team announcement post | OTHER | A11 | ⛔ BLOCKED | — | Owner: record the §10.2 flow (save→share→incognito→run→history) and post 'WebMARS v1.2 is live' to the course channel; README already embeds the v1.0/1.1 demo
   REQ-048 | p.19 D-conventions; p.55 DoD | Sprint process: standups, human cross-review, branch/PR conventions | OTHER | A01 | ⬜ | | process prose; PR conventions honored by this run's workflow; human rituals N/A [annotation, no code]
 
   SECTION COVERAGE AUDIT (P1/1.4): §1 exec summary → dup of REQs (G9).

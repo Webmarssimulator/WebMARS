@@ -60,6 +60,32 @@ Just visit <https://www.webmarsimulator.com/>. No install required.
   IEEE 754 Representation, Memory Reference Visualization, Screen
   Magnifier, and Instruction Counter.
 
+### Accounts, snippets & sharing (v1.2)
+
+WebMARS talks to a small REST backend
+([webmars-api](https://github.com/landclay715/webmars-api), live at
+`webmars-api-production.up.railway.app`) for accounts and snippet
+storage. Everything below is optional — the simulator itself never
+requires an account.
+
+- **Register / sign in** — the *Sign in* button in the toolbar.
+  Usernames are 3–32 chars (`a–z A–Z 0–9 _`), passwords 8+.
+- **Save to account** — once signed in, *Save to Account* stores the
+  editor contents server-side. First save asks for a title and
+  visibility (private by default); later saves update the same snippet.
+- **Share** — after saving, the Share dialog shows a link like
+  `webmarsimulator.com/?snippet=42` with a copy button. Public snippets
+  open for anyone; private ones 404 for everyone but you.
+- **My Snippets / Public Snippets / Run History** — accordion sections
+  in the right inspector: browse and load your saved work, discover
+  public snippets (paginated), and see your recent + most-run programs.
+- **Your code survives refresh** — the editor workspace (tabs + code)
+  persists locally; simulator state (registers, memory) intentionally
+  resets on reload.
+
+> The backend runs on a free tier and sleeps when idle — the first
+> account/snippet request after a quiet period can take ~30 seconds.
+
 ### Keyboard shortcuts
 
 Press `F1` anywhere in the editor for the full reference. Highlights:
@@ -111,6 +137,26 @@ npm run dev
 
 Vite prints the local URL. By default it's `http://localhost:5173`,
 but Vite falls through to `5174`, `5175`, … if 5173 is taken.
+
+### Environment variables
+
+The account/snippet features call the WebMARS API. The base URL comes
+from `VITE_API_BASE` (baked in at build time by Vite):
+
+```bash
+cp .env.local.example .env.local   # then edit as needed
+```
+
+| Variable | Default | Notes |
+|---|---|---|
+| `VITE_API_BASE` | `http://localhost:8080` | Point at a local [webmars-api](https://github.com/landclay715/webmars-api) or the production `https://webmars-api-production.up.railway.app` |
+
+Without a reachable API the editor still works fully — account
+features surface actionable error toasts instead.
+
+For production deploys (Vercel), set `VITE_API_BASE` in the project's
+environment variables and redeploy; see
+[`docs/VERCEL_DEPLOY.md`](./docs/VERCEL_DEPLOY.md).
 
 ### Available scripts
 
