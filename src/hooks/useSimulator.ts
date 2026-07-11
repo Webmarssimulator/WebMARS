@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { TOKEN_STORAGE_KEY, USERNAME_STORAGE_KEY } from '../lib/api.ts'
+import { TOKEN_STORAGE_KEY, USERNAME_STORAGE_KEY, logRun } from '../lib/api.ts'
 import type { Snippet, Visibility } from '../lib/api.ts'
 import { Simulator } from '../core/simulator.ts'
 import { assemble } from '../core/instructions.ts'
@@ -783,6 +783,9 @@ interface SimulatorStoreState {
   closeSaveSnippetDialog: () => void
   openShareModal: () => void
   closeShareModal: () => void
+  // Bumped after each successful POST /runs so an open HistoryPanel
+  // refetches (Enhancement Plan §8.3).
+  runLogVersion: number
 
   // ─ layoutSizes slice (Phase 3 SA-5; persisted to webmars:layout-sizes) ─
   // Drag-handle sizes for the three resizable Shell regions. The
@@ -867,6 +870,41 @@ let _stopFlag = false
 // matches. Cleared on hit, on reset, and when run() exits for any
 // other reason.
 let _tempBreakpoint: number | null = null
+
+// ─ run logging (Enhancement Plan §8.3) ─
+//
+// Fire-and-forget POST /runs when a run ends (completion, error, or
+// user abort). Skips silently when the user isn't signed in or the
+// snippet was never saved (no snippetId to attach). NEVER blocks or
+// breaks the simulator — failures are console.warn only.
+
+let _runStartedAt: number | null = null
+
+function logRunIfPossible(
+  get: () => SimulatorStoreState,
+  exitStatus: 'COMPLETED' | 'ERROR' | 'ABORTED',
+  errorMessage?: string,
+): void {
+  const s = get()
+  const snippetId = s.currentSnippetId
+  if (snippetId === null || !s.authToken) return
+  const durationMs = _runStartedAt !== null ? Date.now() - _runStartedAt : undefined
+  _runStartedAt = null
+  logRun({
+    snippetId,
+    durationMs,
+    instructionsExecuted: s.instructionsExecuted,
+    exitStatus,
+    errorMessage,
+  })
+    .then(() => {
+      // Nudge any open HistoryPanel to refetch.
+      useSimulator.setState((prev) => ({ runLogVersion: prev.runLogVersion + 1 }))
+    })
+    .catch((err: unknown) => {
+      console.warn('Failed to log run:', err)
+    })
+}
 
 // ─ backstep history (commit 3) ─
 //
@@ -1452,6 +1490,7 @@ export const useSimulator = create<SimulatorStoreState>((set, get) => {
     closeSaveSnippetDialog: () => set({ saveSnippetDialogOpen: false }),
     openShareModal:  () => set({ shareModalOpen: true  }),
     closeShareModal: () => set({ shareModalOpen: false }),
+    runLogVersion: 0,
 
     layoutSizes: readPersistedLayoutSizes(),
     setLayoutSize: (key, value) => {
@@ -1838,6 +1877,8 @@ export const useSimulator = create<SimulatorStoreState>((set, get) => {
             },
           })
           get().refreshMemorySnapshot()
+          // §8.3: a step that halts the program is a completed run.
+          if (sim.isHalted()) logRunIfPossible(get, 'COMPLETED')
         } catch (e: unknown) {
           _currentMemWrites = null
           const message = e instanceof Error ? e.message : String(e)
@@ -1845,6 +1886,7 @@ export const useSimulator = create<SimulatorStoreState>((set, get) => {
             status: 'error',
             runtimeError: { pc: get().registers.pc, message },
           })
+          logRunIfPossible(get, 'ERROR', message)
         }
       })()
     },
@@ -1855,6 +1897,7 @@ export const useSimulator = create<SimulatorStoreState>((set, get) => {
       const sim = makeSim()
       patchMemoryForBackstep(sim)
       _stopFlag = false
+      _runStartedAt = Date.now()
       // SA-1: pre-warm console-buffer set BEFORE the first sim.step
       // so React commits a paint of the always-mounted ConsolePanel
       // before the first print's microtask lands.
@@ -1924,6 +1967,9 @@ export const useSimulator = create<SimulatorStoreState>((set, get) => {
             },
           })
           get().refreshMemorySnapshot()
+          // §8.3: log completed runs. Breakpoint hits / pauses are not
+          // run ends — the user can resume; nothing is logged for them.
+          if (sim.isHalted()) logRunIfPossible(get, 'COMPLETED')
         } catch (e: unknown) {
           _currentMemWrites = null
           const message = e instanceof Error ? e.message : String(e)
@@ -1931,11 +1977,14 @@ export const useSimulator = create<SimulatorStoreState>((set, get) => {
             status: 'error',
             runtimeError: { pc: get().registers.pc, message },
           })
+          logRunIfPossible(get, 'ERROR', message)
         }
       })()
     },
 
     reset: () => {
+      // §8.3: resetting a RUNNING program is the user-initiated abort.
+      if (get().status === 'running') logRunIfPossible(get, 'ABORTED')
       _stopFlag = true
       _tempBreakpoint = null
       clearHistory()

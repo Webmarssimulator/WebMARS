@@ -6,6 +6,7 @@ import { FpuRegisterTable } from './FpuRegisterTable.tsx'
 import { MemoryPanel } from './MemoryPanel.tsx'
 import { MySnippetsDrawer } from './MySnippetsDrawer.tsx'
 import { PublicFeed } from './PublicFeed.tsx'
+import { HistoryPanel } from './HistoryPanel.tsx'
 
 interface AccordionSectionProps {
   title: string
@@ -110,6 +111,10 @@ export function RightPanel() {
 
       <AccordionSection title="Public Snippets" defaultOpen={false}>
         <PublicFeed />
+      </AccordionSection>
+
+      <AccordionSection title="Run History" defaultOpen={false}>
+        <HistoryPanel />
       </AccordionSection>
 
       <AccordionSection title="Watches" futureSubAgent="SA-11">
