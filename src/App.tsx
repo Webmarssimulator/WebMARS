@@ -1,6 +1,8 @@
 import { Suspense, lazy } from 'react'
+import { Toaster } from 'sonner'
 import { useRoute } from '@/lib/router.ts'
 import { Shell } from '@/ui/Shell.tsx'
+import { useSimulator } from '@/hooks/useSimulator.ts'
 
 // Lazy-load the landing page so the IDE bundle isn't burdened with
 // marketing CSS for the default route. Users who deep-link to / get the
@@ -10,6 +12,11 @@ const LandingPage = lazy(() => import('@/landing/LandingPage.tsx'))
 
 export default function App() {
   const route = useRoute()
+  const theme = useSimulator((s) => s.theme)
+
+  // Sonner only knows light/dark; the high-contrast shell keeps the
+  // dark toast styling.
+  const toasterTheme = theme === 'light' ? 'light' : 'dark'
 
   if (route === 'landing') {
     return (
@@ -19,5 +26,10 @@ export default function App() {
     )
   }
 
-  return <Shell />
+  return (
+    <>
+      <Shell />
+      <Toaster theme={toasterTheme} position="bottom-right" closeButton richColors />
+    </>
+  )
 }
