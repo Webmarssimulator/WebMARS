@@ -87,7 +87,13 @@ describe('workspace persistence', () => {
 
     const raw = localStorage.getItem(mod.WORKSPACE_STORAGE_KEY)!
     const payload = JSON.parse(raw) as Record<string, unknown>
-    expect(Object.keys(payload).sort()).toEqual(['activeFileId', 'files'])
+    expect(Object.keys(payload).sort()).toEqual([
+      'activeFileId',
+      'currentSnippetId',
+      'currentSnippetTitle',
+      'currentSnippetVisibility',
+      'files',
+    ])
     expect(raw).not.toContain('registers')
     expect(raw).not.toContain('consoleOutput')
     expect(raw).not.toContain('programCounter')

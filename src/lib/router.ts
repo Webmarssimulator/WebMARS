@@ -32,3 +32,24 @@ export function useRoute(): Route {
   }, [])
   return route
 }
+
+// ─ shared-snippet deep links (Enhancement Plan §6.6) ─
+// webmarsimulator.com/?snippet=42 loads snippet 42 on boot; App.tsx
+// owns the fetch + popstate wiring, these helpers own the URL shape.
+
+export function getSnippetIdFromUrl(): number | null {
+  if (typeof window === 'undefined') return null
+  const params = new URLSearchParams(window.location.search)
+  const raw = params.get('snippet')
+  if (!raw) return null
+  const id = parseInt(raw, 10)
+  return Number.isFinite(id) && id > 0 ? id : null
+}
+
+export function setSnippetIdInUrl(id: number | null): void {
+  if (typeof window === 'undefined') return
+  const url = new URL(window.location.href)
+  if (id === null) url.searchParams.delete('snippet')
+  else url.searchParams.set('snippet', String(id))
+  window.history.replaceState({}, '', url.toString())
+}

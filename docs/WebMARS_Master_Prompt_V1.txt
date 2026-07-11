@@ -164,7 +164,7 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   AGENT 05 — rem Pseudo-Instruction (Assembler + Tests) ......... ✅ COMPLETE
   AGENT 06 — Tools: Bitmap Grid Sizes + Screen Magnifier ........ ✅ COMPLETE
   AGENT 07 — Accounts UI: Auth Slice + AuthModal + Toolbar ...... ✅ COMPLETE
-  AGENT 08 — Save, Share & Deep Links (?snippet=<id>) ........... ⬜ NOT STARTED
+  AGENT 08 — Save, Share & Deep Links (?snippet=<id>) ........... ✅ COMPLETE
   AGENT 09 — My Snippets Drawer + Public Feed ................... ⬜ NOT STARTED
   AGENT 10 — Run History: Logging Hook + HistoryPanel ........... ⬜ NOT STARTED
   AGENT 11 — Polish, A11y, Docs, Tests Completion, v1.3 Issues .. ⬜ NOT STARTED
@@ -248,7 +248,17 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   + toolbar/mobile affordances. LIVE production round-trip proven against
   the Railway API: register→login→refresh-persist→logout→401-toast→login.
   Q2 catch: mobile drawer gained the System theme option (REQ-002-EXT-1).
-  138/138 green. PR #47.
+  138/138 green. PR #47 merged, main @ 9b4d9ce.
+  ------------------------------------------------------------------------------
+  [2026-07-10] AGENT 08: save/share/deep links (REQ-009/022/038) done.
+  SaveSnippetDialog + ShareModal + toolbar Save/Share; ?snippet= boot
+  loading + popstate; snippet metadata persisted with workspace. LIVE:
+  save 200 → ShareModal → clipboard verified; 404 → exact plan toast +
+  default example. ⚠ Discovered production backend bug: GET /snippets/
+  {id} and the populated public feed return 500 (lazy owner proxy +
+  open-in-view=false) — share links/feed are DOWN upstream; fix (plan's
+  own SnippetResponse DTO) routed to AGENT 12's fork PR. 138/138 green.
+  PR #48.
   ------------------------------------------------------------------------------
 
 ================================================================================
@@ -915,7 +925,41 @@ APPENDIX A-07 — Accounts UI
   PR # / MAIN COMMIT: PR #47.
 --------------------------------------------------------------------------------
 APPENDIX A-08 — Save, Share & Deep Links
-  STATUS: / DATE: / PER-REQ (009/022/038): / BUILD+TEST: / PR #:
+  STATUS: ✅ COMPLETE / DATE: 2026-07-10
+  REQ-022: IMPLEMENTED — snippet slice in useSimulator (currentSnippetId/
+    Title/Visibility persisted with the workspace payload; persist.test
+    updated to the new shape); SaveSnippetDialog.tsx (title prefill from
+    active file, PRIVATE default, busy state, keyboard contract);
+    ShareModal.tsx (link + Copy via clipboard + toast, visibility display
+    + toggle → PUT with explanatory failure toast); Toolbar
+    SaveShareButtons (authed-only; create → dialog → ShareModal, update
+    → PUT in place, Share reopens modal). LIVE: save 200 → ShareModal →
+    copy toast + clipboard round-trip verified; PUT toggle fails
+    gracefully with explanation (upstream endpoint not live).
+  REQ-009: IMPLEMENTED — router.ts getSnippetIdFromUrl/setSnippetIdInUrl;
+    App.tsx useSnippetDeepLink (boot fetch + document.title + toasts).
+    LIVE: /?snippet=999999 → exact plan toast 'That snippet is private or
+    does not exist.' + default hello example in the editor (view-lines
+    text asserted); upstream-500 case → 'Failed to load shared snippet.'
+    + app remains usable.
+  REQ-038: IMPLEMENTED — popstate handler syncs binding: pushState to /
+    clears (Share button disappears, verified); back restores URL and
+    re-issues GET (verified fired) — full state restore currently
+    blocked LIVE by the upstream 500 below; holds once fixed (A91 Q1
+    re-verifies).
+  ⚠ UPSTREAM BUG DISCOVERED (routed to A12): production GET
+    /snippets/{id} returns 500 for ANY existing snippet (owner or anon,
+    public or private), and GET /snippets/public 500s once rows exist —
+    Snippet.owner is FetchType.LAZY, spring.jpa.open-in-view=false, and
+    Jackson serializes the closed-session proxy →
+    LazyInitializationException. Missing ids correctly 404. Evidence:
+    api-probe scripts (saved id 6 private + id 7 public; GET both → 500
+    {"Error":"An unexpected error occurred…"}; GET 999999 → 404; feed
+    with rows → 500). Share/feed features are DOWN in production until
+    fixed — the plan's own SnippetResponse DTO (§7.5) is the fix; ships
+    in A12's fork PR.
+  BUILD+TEST: typecheck 0 / lint 0 / build exit 0 / vitest 138/138.
+  PR # / MAIN COMMIT: PR #48.
 --------------------------------------------------------------------------------
 APPENDIX A-09 — My Snippets + Public Feed
   STATUS: / DATE: / PER-REQ (032/033): / BUILD+TEST: / PR #:
@@ -953,7 +997,7 @@ the exact owner action. At AGENT 94 exit: zero ⬜, zero 🔄.
   REQ-006 | p.9 §2.6; p.46-48 §8.2 | ScreenMagnifier rewrite: DOM-clone loupe 240x160 @2x, hint state, Escape, no per-mousemove reclone, Monaco excluded | FEATURE | A06 | IMPLEMENTED | #46 | ScreenMagnifier.tsx rewrite; browser-verified clone/hint/Escape
   REQ-007 | p.10 §2.7; p.20 D1 | Toast system via sonner; Toaster at App root; error/success toasts for API calls | UI/UX | A02 | IMPLEMENTED | #42 | src/App.tsx (Toaster mount); A-02
   REQ-008 | p.10 §2.8 | Loading state on every async button: disabled + spinner/label while in flight; no duplicate submits | UI/UX | A90 | ⬜ | | implemented inline by A07-A10; A90 sweeps
-  REQ-009 | p.10-11 §2.9; p.36 §6.6; p.23 D5 | ?snippet=<id> on boot loads snippet into editor; 404 → toast + default example; document title updated | FEATURE | A08 | ⬜ | |
+  REQ-009 | p.10-11 §2.9; p.36 §6.6; p.23 D5 | ?snippet=<id> on boot loads snippet into editor; 404 → toast + default example; document title updated | FEATURE | A08 | IMPLEMENTED | #48 | App.tsx useSnippetDeepLink; live 404-toast + fallback verified (A-08)
   REQ-010 | p.11 §2.10; p.26 D8 | JWT expiry 8h (sprint choice) + README v1.3 note re refresh tokens | FIX | A12 | ⬜ | | 8h pre-exists (verify note)
   REQ-011 | p.11 §2.11; p.39 §7.2; p.56 §10.1 | CORS: prod + localhost origins, methods, headers, credentials, no wildcards | FIX | A12 | ⬜ | | pre-exists upstream (verify)
   REQ-012 | p.12-14 §3.2-3.4 | Flyway versioned migrations; final schema users/snippets(owner,visibility,updated_at,indexes)/runs(indexes) | INFRA | A12 | ⬜ | | V1-V4 pre-exist (verify contents)
@@ -967,7 +1011,7 @@ the exact owner action. At AGENT 94 exit: zero ⬜, zero 🔄.
   REQ-020 | p.30-32 §6.1 | src/lib/api.ts typed client: ApiError, authHeader, request<T> w/ 204, full auth/snippets/runs surface per skeleton | FEATURE | A02 | IMPLEMENTED | #42 | src/lib/api.ts; src/tests/api.test.ts (5 tests)
   REQ-021 | p.34-35 §6.4; p.22 D4 | Auth slice (webmars.token/webmars.username) + AuthModal (tabs, busy, 401/409/429/network msg map) + toolbar Sign-in/username/Log-out | FEATURE | A07 | IMPLEMENTED | #47 | AuthModal.tsx; live prod round-trip in A-07
   REQ-002-EXT-1 | (Q2 of REQ-002) | Mobile drawer theme list gains the System option (second theme-picker instance) | FIX | A07 | IMPLEMENTED | #47 | MobileShell.tsx theme section
-  REQ-022 | p.36 §6.5; p.23 D5 | Save-to-Account + ShareModal: create-vs-update semantics, copy link + toast, visibility shown + toggle → PUT | FEATURE | A08 | ⬜ | |
+  REQ-022 | p.36 §6.5; p.23 D5 | Save-to-Account + ShareModal: create-vs-update semantics, copy link + toast, visibility shown + toggle → PUT | FEATURE | A08 | IMPLEMENTED | #48 | SaveSnippetDialog/ShareModal/Toolbar; live save+copy verified; PUT graceful until A12 fix deploys
   REQ-023 | p.44-45 §7.7; p.22-24 D4-D5 | rem pseudo-instruction: lexer mnemonic, parser ["R","R","R"], assembler div+mfhi expansion [live assembler is instructions.ts; PDF-named files also updated] | FEATURE | A05 | IMPLEMENTED | #45 | instructions.ts rem case; pseudoInstructions.test.ts +4 tests
   REQ-024 | p.40 §7.3; p.24 D5 | Snippet entity v1.2: owner FK lazy, Visibility enum STRING, created/updated timestamps + lifecycle hooks | FEATURE | A12 | ⬜ | | pre-exists (verify)
   REQ-025 | p.40-42 §7.4; p.24 D6 | Run entity + RunRepository: findByUserIdOrderByStartedAtDesc + most-run JPQL projection | FEATURE | A12 | ⬜ | | pre-exists (verify)
@@ -983,7 +1027,7 @@ the exact owner action. At AGENT 94 exit: zero ⬜, zero 🔄.
   REQ-035 | p.26-27 D9 | Empty states w/ exact copy: drawer 'Save your first snippet…', history 'Run a saved snippet…', feed 'No public snippets yet. Be the first.' | UI/UX | A11 | ⬜ | |
   REQ-036 | p.27 D9 | Confirm dialogs for deletes: 'Delete <title>? This cannot be undone.' [Cancel][Delete] | UI/UX | A11 | ⬜ | |
   REQ-037 | p.27 D9 | AuthModal/ShareModal/confirm dialogs: focus trap, Escape closes, Enter submits | UI/UX | A11 | ⬜ | |
-  REQ-038 | p.27 D9 | Browser back/forward between /?snippet=N and / restores snippet state (popstate) | FIX | A08 | ⬜ | |
+  REQ-038 | p.27 D9 | Browser back/forward between /?snippet=N and / restores snippet state (popstate) | FIX | A08 | IMPLEMENTED | #48 | popstate handler in App.tsx; clear verified live; restore blocked by upstream 500 (A91 re-verifies post-A12)
   REQ-039 | p.27 D9 | New modals usable below 768px (mobile spot-check) | UI/UX | A11 | ⬜ | |
   REQ-040 | p.27 D9 | Frontend README rewritten for v1.2 surface: features, env vars, run + deploy instructions | DOCS | A11 | ⬜ | |
   REQ-041 | p.27 D9 | Backend README rewritten for v1.2: endpoints, env vars, deployment | DOCS | A12 | ⬜ | | pre-exists upstream (verify)
