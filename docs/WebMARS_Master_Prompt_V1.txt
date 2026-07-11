@@ -172,7 +172,7 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   ──────────────────────────────────────────────────────────────────────────────
 
   AGENT 90 — Cross-Cutting Quality Sweep ........................ ✅ COMPLETE
-  AGENT 91 — Gap Closure: PDF vs Reality, Q1/Q2/Q3 .............. ⬜ NOT STARTED
+  AGENT 91 — Gap Closure: PDF vs Reality, Q1/Q2/Q3 .............. ✅ COMPLETE
   AGENT 92 — Infrastructure & Config via CLI .................... ⬜ NOT STARTED
   AGENT 93 — AI Tooling Disclosure (single-purpose PR) .......... ⬜ NOT STARTED
   AGENT 94 — FINAL VERIFICATION + FULL REGRESSION + MERGE ....... ⬜ NOT STARTED
@@ -302,7 +302,16 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   targets added to tokens.css. Secret scan clean; no dangerous sinks;
   audit = 8 pre-existing baseline vulns only (sonner clean). Bundle
   growth explained (+33 kB sonner, +42 kB features). REQ-008 flipped.
-  138/138 green. PR #63.
+  138/138 green. PR #63 merged, main @ 1648319.
+  ------------------------------------------------------------------------------
+  [2026-07-10] AGENT 91: gap closure done. Q1 live: persistence (marker
+  survived reload, registers reset) + rem-in-UI (printed '2') — the two
+  flows not previously browser-walked; all else holds per per-agent
+  live evidence; ⛔ rows re-confirmed blocked on the same owner actions.
+  Q2: no raw fetch outside api.ts, no unsafe localStorage, all api
+  sites error-handled; pre-existing Settings/Help dialogs lack Tab
+  traps (pre-v1.2, team note). Q3: cold re-walk → zero unmapped
+  actionable sentences, zero new REQs. No regressions. PR #64.
   ------------------------------------------------------------------------------
 
 ================================================================================
@@ -1232,8 +1241,61 @@ APPENDIX A-90 — Cross-Cutting Quality Sweep
   BLOCKED ITEMS: none.
   PR # / MAIN COMMIT: PR #63.
 --------------------------------------------------------------------------------
-(APPENDIX A blocks for agents 91–94 are filled as those agents complete,
-using the A-91..A-94 field lists from the source master prompt.)
+APPENDIX A-91 — Gap Closure Q1/Q2/Q3
+  STATUS: ✅ COMPLETE / DATE: 2026-07-10
+  Q1 (does it hold) — exercised against main:
+    REQ-001: LIVE — typed a marker program, ran it, reloaded: code
+      survived (view-lines contains marker), registers reset ($t0 ≠ 7
+      after reload). REQ-023: LIVE — rem program assembled with zero
+      errors in the UI and printed '2' (17 rem 5) in the real console.
+    REQ-002/006/007/009/021/022/028/029/030/032/033/034/035/036/037/
+      038/039: live/browser evidence already recorded in A-04..A-11
+      during their agents (this run live-verified as it went — each
+      Appendix block names its walk). REQ-004/010..013/016/024/025/041:
+      upstream-file + live-behavior evidence in A-12. ⛔ rows
+      (003/005/014/015/026/027/047): re-confirmed still blocked on the
+      SAME owner actions — no silent passes.
+  Q2 (other instances) — themes swept, places checked:
+    Raw fetch outside src/lib/api.ts → grep 'fetch(' over src: only
+      api.ts + test mocks (plan §6.1 rule holds everywhere).
+    Unsafe localStorage access → grep over src/ui: none (all via
+      try/catch helpers in the store / api.ts).
+    API calls without error handling → every api.* call site in
+      components reviewed: all wrapped (try/catch + toast, or .catch →
+      error state with Retry).
+    rem in the dormant parallel assembler (src/core/assembler/) →
+      already covered by A05 (both implementations updated).
+    Theme picker second instance (MobileShell) → fixed in A07 as
+      REQ-002-EXT-1.
+    FINDING (pre-existing, NOT plan scope, left for the team): the
+      pre-v1.2 SettingsDialog/HelpDialog close on Escape but lack Tab
+      traps — the plan's D9 keyboard contract named only the NEW modals,
+      all of which trap correctly (A-11).
+  Q3 (missed by matrix) — cold re-walk of all 60 pages against Appendix
+    B's section-coverage audit: every actionable sentence maps to a REQ
+    or a recorded annotation. Double-checked easy misses: D1 'confirm
+    Vercel access' (owner/process), D4 '10-second screen recording in
+    the PR description' (process artifact — PR bodies carry written
+    evidence; video family = REQ-047 ⛔), D5 fourth rem test (done),
+    D8 backend README v1.3 note (in webmars-api#24), §10.3 calendar
+    reminder (owner action, listed under A92/REQ-045), §10.6 reading
+    order (no action). ZERO new REQs required.
+  INTERPRETATIONS UPGRADED (91.4): all G10 flags took the more complete
+    reading — REQ-002 gained 'system' + the mobile picker; REQ-014
+    gained Retry-After + configurable limits (PR #24); REQ-015 full
+    26-test suite authored; REQ-017 Render→Railway substitution
+    documented with live verification.
+  APPENDIX B STATE at A91 exit: 35 IMPLEMENTED, 7 ⛔ (all naming exact
+    owner actions), remaining ⬜ = REQ-017/019/043/044/045 (owned by
+    AGENT 92, next in ledger order) + REQ-048 (process annotation,
+    dispositioned by A92's pass).
+  BUILD+TEST on main: vitest 138/138; build exit 0.
+  REGRESSIONS FIXED: none found (Q1 all green).
+  BLOCKED ITEMS: none new.
+  PR # / MAIN COMMIT: PR #64.
+--------------------------------------------------------------------------------
+(APPENDIX A blocks for agents 92–94 are filled as those agents complete,
+using the A-92..A-94 field lists from the source master prompt.)
 
 ================================================================================
     APPENDIX B — REQUIREMENTS TRACEABILITY MATRIX (AGENT 01 POPULATES)
