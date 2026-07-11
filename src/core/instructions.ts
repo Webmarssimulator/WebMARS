@@ -238,6 +238,8 @@ export function assemble(source: string): AssembledProgram {
           textAddr += 8; // slt + (beq|bne)
         } else if (mn === 'sge') {
           textAddr += 8; // slt + xori
+        } else if (mn === 'rem') {
+          textAddr += 8; // div + mfhi
         } else if (mn === 'abs') {
           textAddr += 12; // sra + xor + sub
         } else {
@@ -694,6 +696,16 @@ export function assemble(source: string): AssembledProgram {
             // sgt $rd, $rs, $rt → slt $rd, $rt, $rs (operands swapped)
             const rd2 = getR(0); const rs2 = getR(2); const rt2 = getR(4);
             instr = rType(0, rt2, rs2, rd2, 0, 0x2a);
+            consumed = 5; break;
+          }
+          case 'rem': {
+            // rem $rd, $rs, $rt → div $rs, $rt; mfhi $rd
+            // (Enhancement Plan §7.7 — the remainder lands in HI.
+            // rem-by-zero hits the runtime's existing div-by-zero rule.)
+            const rd2 = getR(0); const rs2 = getR(2); const rt2 = getR(4);
+            instructions.push(rType(0, rs2, rt2, 0, 0, 0x1a));  // div $rs, $rt
+            textAddr += 4; sourceMap.set(textAddr, line);
+            instr = rType(0, 0, 0, rd2, 0, 0x10);               // mfhi $rd
             consumed = 5; break;
           }
           case 'neg': {

@@ -135,6 +135,7 @@ export const INSTRUCTION_ENTRIES: ReadonlyArray<InstructionEntry> = [
   { mnemonic: 'abs',  category: 'pseudo', format: 'abs $rd, $rs',          description: 'Absolute value. sra + xor + sub.' },
   { mnemonic: 'sge',  category: 'pseudo', format: 'sge $rd, $rs, $rt',     description: 'Set if greater or equal. slt + xori 1.' },
   { mnemonic: 'sgt',  category: 'pseudo', format: 'sgt $rd, $rs, $rt',     description: 'Set if greater than. slt with operands swapped.' },
+  { mnemonic: 'rem',  category: 'pseudo', format: 'rem $rd, $rs, $rt',     description: 'Remainder. div $rs, $rt + mfhi $rd. Remainder by zero raises the same runtime error as div by zero.' },
   { mnemonic: 'neg',  category: 'pseudo', format: 'neg $rd, $rs',          description: 'Negate. sub $rd, $zero, $rs.' },
   { mnemonic: 'not',  category: 'pseudo', format: 'not $rd, $rs',          description: 'Bitwise NOT. nor $rd, $rs, $zero.' },
   { mnemonic: 'nop',  category: 'pseudo', format: 'nop',                   description: 'No operation. sll $zero, $zero, 0.' },

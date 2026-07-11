@@ -17,7 +17,7 @@ const MNEMONICS = [
   'add', 'addu', 'sub', 'subu', 'and', 'or', 'xor', 'nor',
   'sll', 'srl', 'sra', 'sllv', 'srlv', 'srav',
   'slt', 'sltu',
-  'mult', 'multu', 'div', 'divu', 'mul',
+  'mult', 'multu', 'div', 'divu', 'mul', 'rem',
   'mfhi', 'mflo', 'mthi', 'mtlo',
   // I-type arithmetic / logical
   'addi', 'addiu', 'andi', 'ori', 'xori', 'slti', 'sltiu', 'lui',
@@ -77,6 +77,7 @@ const INSTRUCTION_REFERENCE: Record<string, InstructionRef> = {
   multu:  { signature: 'multu $rs, $rt',         desc: 'Multiply unsigned. HI:LO = $rs * $rt.' },
   div:    { signature: 'div $rs, $rt',           desc: 'Divide signed. LO = $rs / $rt; HI = $rs % $rt.' },
   divu:   { signature: 'divu $rs, $rt',          desc: 'Divide unsigned. LO = quotient; HI = remainder.' },
+  rem:    { signature: 'rem $rd, $rs, $rt',      desc: 'Remainder (pseudo). Expands to div $rs, $rt + mfhi $rd.' },
   mfhi:   { signature: 'mfhi $rd',               desc: 'Move from HI. $rd = HI.' },
   mflo:   { signature: 'mflo $rd',               desc: 'Move from LO. $rd = LO.' },
 

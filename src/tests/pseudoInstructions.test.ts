@@ -271,4 +271,70 @@ describe('Pseudo-instructions (Phase 3 SA-2)', () => {
     `)
     expect(out).toBe('7')
   })
+
+  // ── rem (Enhancement Plan §7.7) — div $rs, $rt + mfhi $rd ──────────
+
+  it('rem expands to two machine words', () => {
+    const withRem = assemble(`
+      .text
+      main:
+        rem     $t0, $t1, $t2
+    `)
+    expect(withRem.errors).toEqual([])
+    const withoutRem = assemble(`
+      .text
+      main:
+        nop
+    `)
+    expect(withoutRem.errors).toEqual([])
+    expect(withRem.instructions.length).toBe(withoutRem.instructions.length + 1)
+  })
+
+  it('rem computes a positive remainder', async () => {
+    const out = await runAndPrintV0(`
+      .text
+      main:
+        li      $t1, 17
+        li      $t2, 5
+        rem     $t0, $t1, $t2
+        move    $a0, $t0
+        li      $v0, 1
+        syscall
+        li      $v0, 10
+        syscall
+    `)
+    expect(out).toBe('2')
+  })
+
+  it('rem of a negative dividend keeps the dividend sign (MIPS div semantics)', async () => {
+    const out = await runAndPrintV0(`
+      .text
+      main:
+        li      $t1, -17
+        li      $t2, 5
+        rem     $t0, $t1, $t2
+        move    $a0, $t0
+        li      $v0, 1
+        syscall
+        li      $v0, 10
+        syscall
+    `)
+    expect(out).toBe('-2')
+  })
+
+  it('rem by zero raises the same runtime error as div by zero', async () => {
+    const program = assemble(`
+      .text
+      main:
+        li      $t1, 17
+        li      $t2, 0
+        rem     $t0, $t1, $t2
+        li      $v0, 10
+        syscall
+    `)
+    expect(program.errors).toEqual([])
+    const sim = new Simulator(makeIO([]))
+    sim.load(program)
+    await expect(sim.run()).rejects.toThrow(/division by zero/i)
+  })
 })
