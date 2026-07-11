@@ -285,6 +285,56 @@ function makeFileId(): string {
   return `file-${Date.now()}-${Math.floor(Math.random() * 1000)}`
 }
 
+// ─ workspace persistence ─
+//
+// The editor content (files + active tab) survives a page refresh; the
+// simulator core state (registers, memory, PC, console) deliberately does
+// NOT — users expect a fresh run after reload, and persisting it would
+// bloat localStorage on every step. FileSystemFileHandle objects are not
+// serializable, so handles rehydrate as null (Save re-prompts, same as a
+// freshly opened tab).
+
+export const WORKSPACE_STORAGE_KEY = 'webmars:workspace-v1'
+
+export interface PersistedWorkspace {
+  files: Array<Pick<FileEntry, 'id' | 'name' | 'source' | 'modified'>>
+  activeFileId: string | null
+}
+
+export function readPersistedWorkspace(): PersistedWorkspace | null {
+  try {
+    const raw = typeof window === 'undefined' ? null : window.localStorage.getItem(WORKSPACE_STORAGE_KEY)
+    if (raw === null) return null
+    const parsed: unknown = JSON.parse(raw)
+    if (typeof parsed !== 'object' || parsed === null) return null
+    const obj = parsed as Record<string, unknown>
+    if (!Array.isArray(obj.files)) return null
+    const files: PersistedWorkspace['files'] = []
+    for (const entry of obj.files) {
+      if (typeof entry !== 'object' || entry === null) continue
+      const f = entry as Record<string, unknown>
+      if (typeof f.id === 'string' && typeof f.name === 'string' && typeof f.source === 'string') {
+        files.push({ id: f.id, name: f.name, source: f.source, modified: f.modified === true })
+      }
+    }
+    if (files.length === 0) return null
+    const activeFileId = typeof obj.activeFileId === 'string' ? obj.activeFileId : null
+    return { files, activeFileId }
+  } catch {
+    // Corrupt payload or privacy mode — fall back to the default file.
+    return null
+  }
+}
+
+export function writePersistedWorkspace(workspace: PersistedWorkspace): void {
+  try {
+    if (typeof window === 'undefined') return
+    window.localStorage.setItem(WORKSPACE_STORAGE_KEY, JSON.stringify(workspace))
+  } catch {
+    // ignore — privacy mode / quota
+  }
+}
+
 // ─ bottom-panel messages ─
 
 export type BottomMessageLevel = 'info' | 'warn' | 'error'
@@ -966,20 +1016,31 @@ export const useSimulator = create<SimulatorStoreState>((set, get) => {
   }
 
   // Hello MIPS becomes the initial file entry so screenshots show
-  // working code without anyone having to load it.
+  // working code without anyone having to load it. A persisted
+  // workspace from a previous session takes precedence — the loudest
+  // v1.1 complaint was losing code on refresh.
   const helloFileId = 'hello-mips'
-  const initialFiles: FileEntry[] = [
-    {
-      id: helloFileId,
-      name: 'hello.asm',
-      source: HELLO_MIPS_SOURCE,
-      handle: null,
-      modified: false,
-    },
-  ]
+  const persistedWorkspace = readPersistedWorkspace()
+  const initialFiles: FileEntry[] = persistedWorkspace
+    ? persistedWorkspace.files.map((f) => ({ ...f, handle: null }))
+    : [
+        {
+          id: helloFileId,
+          name: 'hello.asm',
+          source: HELLO_MIPS_SOURCE,
+          handle: null,
+          modified: false,
+        },
+      ]
+  const initialActiveFileId =
+    persistedWorkspace && initialFiles.some((f) => f.id === persistedWorkspace.activeFileId)
+      ? persistedWorkspace.activeFileId
+      : (initialFiles[0]?.id ?? helloFileId)
+  const initialSource =
+    initialFiles.find((f) => f.id === initialActiveFileId)?.source ?? HELLO_MIPS_SOURCE
 
   return {
-    source: HELLO_MIPS_SOURCE,
+    source: initialSource,
     status: 'idle',
     registers: initialRegisters,
     consoleOutput: [],
@@ -991,7 +1052,7 @@ export const useSimulator = create<SimulatorStoreState>((set, get) => {
 
     // file slice
     files: initialFiles,
-    activeFileId: helloFileId,
+    activeFileId: initialActiveFileId,
     recentFiles: readRecentFiles(),
 
     // layout slice — initial values from localStorage (or viewport defaults)
@@ -1772,3 +1833,35 @@ export const useSimulator = create<SimulatorStoreState>((set, get) => {
     },
   }
 })
+
+// ─ workspace persistence wiring ─
+//
+// A single store subscription persists the workspace whenever the file
+// slice changes. Writes are debounced so per-keystroke setSource calls
+// don't hammer localStorage; beforeunload flushes any pending write so
+// the very last keystrokes survive an immediate refresh.
+
+const WORKSPACE_WRITE_DEBOUNCE_MS = 250
+let _workspaceWriteTimer: ReturnType<typeof setTimeout> | null = null
+
+function flushWorkspaceWrite(): void {
+  if (_workspaceWriteTimer !== null) {
+    clearTimeout(_workspaceWriteTimer)
+    _workspaceWriteTimer = null
+  }
+  const s = useSimulator.getState()
+  writePersistedWorkspace({
+    files: s.files.map(({ id, name, source, modified }) => ({ id, name, source, modified })),
+    activeFileId: s.activeFileId,
+  })
+}
+
+useSimulator.subscribe((state, prev) => {
+  if (state.files === prev.files && state.activeFileId === prev.activeFileId) return
+  if (_workspaceWriteTimer !== null) clearTimeout(_workspaceWriteTimer)
+  _workspaceWriteTimer = setTimeout(flushWorkspaceWrite, WORKSPACE_WRITE_DEBOUNCE_MS)
+})
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', flushWorkspaceWrite)
+}
