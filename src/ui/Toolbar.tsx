@@ -1,5 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { toast } from 'sonner'
+import * as api from '@/lib/api.ts'
 import { useSimulator, type ExampleName, RUN_SPEED_STOPS } from '@/hooks/useSimulator.ts'
 import { getEditorCursor } from '@/lib/editorCursor.ts'
 import { Button } from './Button.tsx'
@@ -201,6 +203,80 @@ function FileOpButton({
 
 function Divider() {
   return <span aria-hidden="true" className="mx-1 h-6 w-px bg-divider" />
+}
+
+// Enhancement Plan §6.5: Save to Account / Share. Visible only when
+// signed in. First save opens the title+visibility dialog (which hands
+// off to the ShareModal); subsequent saves PUT the current snippet in
+// place with a busy state — clicking twice can't double-submit.
+function SaveShareButtons() {
+  const authToken = useSimulator((s) => s.authToken)
+  const currentSnippetId = useSimulator((s) => s.currentSnippetId)
+  const openShareModal = useSimulator((s) => s.openShareModal)
+  const [saving, setSaving] = useState(false)
+
+  if (!authToken) return null
+
+  async function onSave() {
+    if (saving) return
+    const s = useSimulator.getState()
+    if (s.currentSnippetId === null) {
+      s.openSaveSnippetDialog()
+      return
+    }
+    setSaving(true)
+    try {
+      const updated = await api.updateSnippet(s.currentSnippetId, { code: s.source })
+      useSimulator.getState().setCurrentSnippet({
+        id: updated.id,
+        title: updated.title,
+        visibility: updated.visibility,
+      })
+      toast.success(`Saved ${updated.title ?? 'snippet'}`)
+    } catch (err) {
+      toast.error(
+        err instanceof api.ApiError
+          ? err.status === 401
+            ? 'Your session expired. Sign in again to save.'
+            : `Save failed (HTTP ${err.status}). The update endpoint may not be live yet.`
+          : 'Save failed. Check your connection.',
+      )
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => void onSave()}
+        disabled={saving}
+        title={
+          currentSnippetId === null
+            ? 'Save this code to your account'
+            : 'Save changes to the current snippet'
+        }
+        className={cn(
+          'mr-1 rounded-sm bg-surface-2 px-2 py-1 text-xs font-medium text-ink-1 transition-colors hover:bg-surface-3',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+          saving && 'cursor-not-allowed opacity-60',
+        )}
+      >
+        {saving ? 'Saving…' : currentSnippetId === null ? 'Save to Account' : 'Save Snippet'}
+      </button>
+      {currentSnippetId !== null && (
+        <button
+          type="button"
+          onClick={openShareModal}
+          title="Show the shareable link for this snippet"
+          className="mr-1 rounded-sm bg-surface-2 px-2 py-1 text-xs font-medium text-ink-1 transition-colors hover:bg-surface-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          Share
+        </button>
+      )}
+    </>
+  )
 }
 
 // Enhancement Plan §6.4: Sign-in affordance. Logged out → a "Sign in"
@@ -443,6 +519,9 @@ export function Toolbar() {
 
       {/* Right side: spacer pushes StatusPill to the far edge. */}
       <span className="flex-1" aria-hidden="true" />
+
+      {/* Enhancement Plan §6.5: save-to-account + share. */}
+      <SaveShareButtons />
 
       {/* Enhancement Plan §6.4: account sign-in / username menu. */}
       <AuthMenu />

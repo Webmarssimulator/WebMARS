@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { TOKEN_STORAGE_KEY, USERNAME_STORAGE_KEY } from '../lib/api.ts'
+import type { Snippet, Visibility } from '../lib/api.ts'
 import { Simulator } from '../core/simulator.ts'
 import { assemble } from '../core/instructions.ts'
 import { REGISTER_NAMES } from '../core/registers.ts'
@@ -323,6 +324,11 @@ export const WORKSPACE_STORAGE_KEY = 'webmars:workspace-v1'
 export interface PersistedWorkspace {
   files: Array<Pick<FileEntry, 'id' | 'name' | 'source' | 'modified'>>
   activeFileId: string | null
+  // Which server-side snippet the editor was on (Enhancement Plan §6.5)
+  // — lets a refresh remember that Save should UPDATE, not create.
+  currentSnippetId?: number | null
+  currentSnippetTitle?: string | null
+  currentSnippetVisibility?: Visibility | null
 }
 
 export function readPersistedWorkspace(): PersistedWorkspace | null {
@@ -343,7 +349,13 @@ export function readPersistedWorkspace(): PersistedWorkspace | null {
     }
     if (files.length === 0) return null
     const activeFileId = typeof obj.activeFileId === 'string' ? obj.activeFileId : null
-    return { files, activeFileId }
+    const currentSnippetId = typeof obj.currentSnippetId === 'number' ? obj.currentSnippetId : null
+    const currentSnippetTitle = typeof obj.currentSnippetTitle === 'string' ? obj.currentSnippetTitle : null
+    const currentSnippetVisibility =
+      obj.currentSnippetVisibility === 'PUBLIC' || obj.currentSnippetVisibility === 'PRIVATE'
+        ? obj.currentSnippetVisibility
+        : null
+    return { files, activeFileId, currentSnippetId, currentSnippetTitle, currentSnippetVisibility }
   } catch {
     // Corrupt payload or privacy mode — fall back to the default file.
     return null
@@ -756,6 +768,21 @@ interface SimulatorStoreState {
   clearAuth: () => void
   openAuthModal: () => void
   closeAuthModal: () => void
+
+  // ─ snippet slice (Enhancement Plan §6.5/§6.6) ─
+  // Which server-side snippet the editor is on. Persisted with the
+  // workspace so a refresh remembers; null = unsaved local work.
+  currentSnippetId: number | null
+  currentSnippetTitle: string | null
+  currentSnippetVisibility: Visibility | null
+  saveSnippetDialogOpen: boolean
+  shareModalOpen: boolean
+  setCurrentSnippet: (snippet: { id: number; title: string | null; visibility: Visibility } | null) => void
+  loadSnippetIntoEditor: (snippet: Snippet) => void
+  openSaveSnippetDialog: () => void
+  closeSaveSnippetDialog: () => void
+  openShareModal: () => void
+  closeShareModal: () => void
 
   // ─ layoutSizes slice (Phase 3 SA-5; persisted to webmars:layout-sizes) ─
   // Drag-handle sizes for the three resizable Shell regions. The
@@ -1373,6 +1400,59 @@ export const useSimulator = create<SimulatorStoreState>((set, get) => {
     openAuthModal:  () => set({ authModalOpen: true  }),
     closeAuthModal: () => set({ authModalOpen: false }),
 
+    // snippet slice — currentSnippet* rides the persisted workspace
+    // payload (see the workspace subscription at module bottom).
+    currentSnippetId: persistedWorkspace?.currentSnippetId ?? null,
+    currentSnippetTitle: persistedWorkspace?.currentSnippetTitle ?? null,
+    currentSnippetVisibility: persistedWorkspace?.currentSnippetVisibility ?? null,
+    saveSnippetDialogOpen: false,
+    shareModalOpen: false,
+    setCurrentSnippet: (snippet) =>
+      set({
+        currentSnippetId: snippet?.id ?? null,
+        currentSnippetTitle: snippet?.title ?? null,
+        currentSnippetVisibility: snippet?.visibility ?? null,
+      }),
+    loadSnippetIntoEditor: (snippet) => {
+      const s = get()
+      const fileName = `${snippet.title ?? `snippet-${snippet.id}`}.asm`
+      const existing = s.files.find((f) => f.name === fileName)
+      const meta = {
+        currentSnippetId: snippet.id,
+        currentSnippetTitle: snippet.title,
+        currentSnippetVisibility: snippet.visibility,
+      }
+      if (existing) {
+        set({
+          files: s.files.map((f) =>
+            f.id === existing.id ? { ...f, source: snippet.code, modified: false } : f,
+          ),
+          activeFileId: existing.id,
+          source: snippet.code,
+          ...meta,
+        })
+        return
+      }
+      const id = makeFileId()
+      const entry: FileEntry = {
+        id,
+        name: fileName,
+        source: snippet.code,
+        handle: null,
+        modified: false,
+      }
+      set({
+        files: [...s.files, entry],
+        activeFileId: id,
+        source: snippet.code,
+        ...meta,
+      })
+    },
+    openSaveSnippetDialog:  () => set({ saveSnippetDialogOpen: true  }),
+    closeSaveSnippetDialog: () => set({ saveSnippetDialogOpen: false }),
+    openShareModal:  () => set({ shareModalOpen: true  }),
+    closeShareModal: () => set({ shareModalOpen: false }),
+
     layoutSizes: readPersistedLayoutSizes(),
     setLayoutSize: (key, value) => {
       const next = { ...get().layoutSizes, [key]: value }
@@ -1914,11 +1994,20 @@ function flushWorkspaceWrite(): void {
   writePersistedWorkspace({
     files: s.files.map(({ id, name, source, modified }) => ({ id, name, source, modified })),
     activeFileId: s.activeFileId,
+    currentSnippetId: s.currentSnippetId,
+    currentSnippetTitle: s.currentSnippetTitle,
+    currentSnippetVisibility: s.currentSnippetVisibility,
   })
 }
 
 useSimulator.subscribe((state, prev) => {
-  if (state.files === prev.files && state.activeFileId === prev.activeFileId) return
+  if (
+    state.files === prev.files &&
+    state.activeFileId === prev.activeFileId &&
+    state.currentSnippetId === prev.currentSnippetId &&
+    state.currentSnippetTitle === prev.currentSnippetTitle &&
+    state.currentSnippetVisibility === prev.currentSnippetVisibility
+  ) return
   if (_workspaceWriteTimer !== null) clearTimeout(_workspaceWriteTimer)
   _workspaceWriteTimer = setTimeout(flushWorkspaceWrite, WORKSPACE_WRITE_DEBOUNCE_MS)
 })

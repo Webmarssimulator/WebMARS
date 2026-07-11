@@ -13,6 +13,8 @@ import { StatusBar } from './StatusBar.tsx'
 import { DevPanel } from './DevPanel.tsx'
 import { SettingsDialog } from './SettingsDialog.tsx'
 import { AuthModal } from './AuthModal.tsx'
+import { SaveSnippetDialog } from './SaveSnippetDialog.tsx'
+import { ShareModal } from './ShareModal.tsx'
 import { CommandPalette } from './CommandPalette.tsx'
 import { InstructionCounter } from './InstructionCounter.tsx'
 import { HelpDialog } from './HelpDialog.tsx'
@@ -103,6 +105,8 @@ export function Shell() {
       <>
         <MobileShell />
         <AuthModal />
+        <SaveSnippetDialog />
+        <ShareModal />
         {import.meta.env.DEV && <DevPanel />}
       </>
     )
@@ -165,6 +169,8 @@ export function Shell() {
       {import.meta.env.DEV && <DevPanel />}
       <SettingsDialog />
       <AuthModal />
+      <SaveSnippetDialog />
+      <ShareModal />
       <CommandPalette />
       <InstructionCounter />
       <HelpDialog />
