@@ -161,7 +161,7 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   AGENT 02 — API Client, Toast System & Env-Aware Base URL ...... ✅ COMPLETE
   AGENT 03 — Editor Persistence Across Refresh .................. ✅ COMPLETE
   AGENT 04 — Monaco Light Theme + System Preference ............. ✅ COMPLETE
-  AGENT 05 — rem Pseudo-Instruction (Assembler + Tests) ......... ⬜ NOT STARTED
+  AGENT 05 — rem Pseudo-Instruction (Assembler + Tests) ......... ✅ COMPLETE
   AGENT 06 — Tools: Bitmap Grid Sizes + Screen Magnifier ........ ⬜ NOT STARTED
   AGENT 07 — Accounts UI: Auth Slice + AuthModal + Toolbar ...... ⬜ NOT STARTED
   AGENT 08 — Save, Share & Deep Links (?snippet=<id>) ........... ⬜ NOT STARTED
@@ -227,7 +227,15 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   done. webmars-light registered; theme prop derived via resolveTheme;
   'system' option follows matchMedia live; SettingsDialog copy fixed.
   LIVE browser proof: editor bg rgb(10,10,10)→rgb(255,255,255)→back on
-  radio toggles (playwright + Edge headless). 134/134 green. PR #44.
+  radio toggles (playwright + Edge headless). 134/134 green. PR #44
+  merged, main @ e7ea3c4.
+  ------------------------------------------------------------------------------
+  [2026-07-10] AGENT 05: rem pseudo-instruction (REQ-023) done. Ground-
+  truth correction: live assembler is src/core/instructions.ts, not the
+  dormant src/core/assembler/ files the PDF names — implemented in both.
+  div+mfhi expansion, pass-1 sizing, syntax highlight, hover ref, help
+  entry. 4 new tests incl. negative dividend + rem-by-zero. 138/138
+  green. PR #45.
   ------------------------------------------------------------------------------
 
 ================================================================================
@@ -812,7 +820,28 @@ APPENDIX A-04 — Monaco Light Theme + System Preference
   PR # / MAIN COMMIT: PR #44.
 --------------------------------------------------------------------------------
 APPENDIX A-05 — rem Pseudo-Instruction
-  STATUS: / DATE: / PER-REQ (023): / BUILD+TEST: / PR #:
+  STATUS: ✅ COMPLETE / DATE: 2026-07-10
+  REQ-023: IMPLEMENTED — IMPORTANT GROUND-TRUTH CORRECTION: the app's LIVE
+    assembler is src/core/instructions.ts (single-file lexer+parser+
+    emitter); src/core/assembler/{lexer,parser,assembler}.ts (the files
+    the PDF names) is a dormant parallel implementation not imported by
+    the app. rem implemented in BOTH:
+    - src/core/instructions.ts: pass-1 size entry (rem → +8 bytes) +
+      second-pass case 'rem' → div $rs,$rt (funct 0x1a) + mfhi $rd
+      (funct 0x10), sourceMap kept in sync.
+    - src/core/assembler/*: mnemonic, ["R","R","R"] signature, expansion
+      case (parity with the PDF's named files).
+    - src/lib/mipsLanguage.ts: rem added to highlight MNEMONICS + hover
+      INSTRUCTION_REFERENCE. src/lib/instructionReference.ts: rem row in
+      the pseudo category → renders automatically in HelpDialog's
+      Pseudo-Instructions tab (REQ-042 contribution).
+    Tests (src/tests/pseudoInstructions.test.ts — repo's pseudo-op home,
+    not a new assembler.test.ts; codebase convention): expansion adds
+    exactly one extra word vs nop; 17 rem 5 prints '2'; -17 rem 5 prints
+    '-2' (dividend-sign semantics); rem-by-zero rejects with the
+    runtime's existing 'Division by zero'.
+  BUILD+TEST: typecheck 0 / lint 0 / build exit 0 / vitest 138/138.
+  PR # / MAIN COMMIT: PR #45.
 --------------------------------------------------------------------------------
 APPENDIX A-06 — Tools: Bitmap + Magnifier
   STATUS: / DATE: / PER-REQ (006/028/029): / BUILD+TEST: / PR #:
@@ -873,7 +902,7 @@ the exact owner action. At AGENT 94 exit: zero ⬜, zero 🔄.
   REQ-020 | p.30-32 §6.1 | src/lib/api.ts typed client: ApiError, authHeader, request<T> w/ 204, full auth/snippets/runs surface per skeleton | FEATURE | A02 | IMPLEMENTED | #42 | src/lib/api.ts; src/tests/api.test.ts (5 tests)
   REQ-021 | p.34-35 §6.4; p.22 D4 | Auth slice (webmars.token/webmars.username) + AuthModal (tabs, busy, 401/409/429/network msg map) + toolbar Sign-in/username/Log-out | FEATURE | A07 | ⬜ | |
   REQ-022 | p.36 §6.5; p.23 D5 | Save-to-Account + ShareModal: create-vs-update semantics, copy link + toast, visibility shown + toggle → PUT | FEATURE | A08 | ⬜ | |
-  REQ-023 | p.44-45 §7.7; p.22-24 D4-D5 | rem pseudo-instruction: lexer mnemonic, parser ["R","R","R"], assembler div+mfhi expansion | FEATURE | A05 | ⬜ | |
+  REQ-023 | p.44-45 §7.7; p.22-24 D4-D5 | rem pseudo-instruction: lexer mnemonic, parser ["R","R","R"], assembler div+mfhi expansion [live assembler is instructions.ts; PDF-named files also updated] | FEATURE | A05 | IMPLEMENTED | #45 | instructions.ts rem case; pseudoInstructions.test.ts +4 tests
   REQ-024 | p.40 §7.3; p.24 D5 | Snippet entity v1.2: owner FK lazy, Visibility enum STRING, created/updated timestamps + lifecycle hooks | FEATURE | A12 | ⬜ | | pre-exists (verify)
   REQ-025 | p.40-42 §7.4; p.24 D6 | Run entity + RunRepository: findByUserIdOrderByStartedAtDesc + most-run JPQL projection | FEATURE | A12 | ⬜ | | pre-exists (verify)
   REQ-026 | p.42-43 §7.5; p.24 D6 | SnippetController v1.2: visibility-gated GET, /mine, /public paginated (size cap 100), /save sets owner, PUT update, DELETE owner-checked | FEATURE | A12 | ⬜ | | PUT missing upstream → fork PR

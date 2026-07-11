@@ -60,7 +60,7 @@ const MNEMONICS = new Set([
   // Pseudo
   "li", "la", "move", "nop", "syscall", "break",
   "blt", "ble", "bgt", "bge",
-  "mul", "neg", "not",
+  "mul", "rem", "neg", "not",
   "push", "pop",
 ]);
 
