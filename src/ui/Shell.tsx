@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
-import { useSimulator } from '@/hooks/useSimulator.ts'
+import { useSimulator, resolveTheme } from '@/hooks/useSimulator.ts'
 import { useIsMobile } from '@/hooks/useIsMobile.ts'
+import { useSystemColorScheme } from '@/hooks/useSystemColorScheme.ts'
 import { MenuBar } from './MenuBar.tsx'
 import { Toolbar } from './Toolbar.tsx'
 import { TabStrip } from './TabStrip.tsx'
@@ -38,13 +39,16 @@ export function Shell() {
   const layoutSizes      = useSimulator((s) => s.layoutSizes)
   const setLayoutSize    = useSimulator((s) => s.setLayoutSize)
   const isMobile         = useIsMobile()
+  const systemScheme     = useSystemColorScheme()
 
   // Apply theme via documentElement.dataset.theme. tokens.css scopes
   // light + HC overrides under [data-theme="…"] selectors so every
   // var(--…) reader picks up the new value without code changes.
+  // 'system' resolves to light/dark from the OS preference and
+  // re-applies live when the OS theme flips.
   useEffect(() => {
-    document.documentElement.dataset.theme = theme
-  }, [theme])
+    document.documentElement.dataset.theme = resolveTheme(theme, systemScheme)
+  }, [theme, systemScheme])
 
   // Install the global keybinding map (Ctrl+S, F5, F7, etc.). The
   // module reads the store via getState() so the listener doesn't

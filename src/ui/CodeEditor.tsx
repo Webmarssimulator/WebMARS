@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Editor, type Monaco, type OnMount } from '@monaco-editor/react'
 import type { editor as monacoEditor } from 'monaco-editor'
-import { useSimulator } from '@/hooks/useSimulator.ts'
+import { useSimulator, resolveTheme } from '@/hooks/useSimulator.ts'
 import { useIsMobile } from '@/hooks/useIsMobile.ts'
+import { useSystemColorScheme } from '@/hooks/useSystemColorScheme.ts'
 import { registerMips } from '@/lib/mipsLanguage.ts'
 import { JUMP_TO_LINE_EVENT, type JumpToLineDetail } from '@/lib/jumpToLine.ts'
 import { setEditorCursorReader } from '@/lib/editorCursor.ts'
@@ -28,7 +29,15 @@ export function CodeEditor() {
   const breakpoints      = useSimulator((s) => s.breakpoints)
   const editorFontSize   = useSimulator((s) => s.editorFontSize)
   const mobileEditAllowed= useSimulator((s) => s.mobileEditAllowed)
+  const theme            = useSimulator((s) => s.theme)
+  const systemScheme     = useSystemColorScheme()
   const isMobile         = useIsMobile()
+
+  // The editor follows the app theme (Enhancement Plan §2.2). 'hc'
+  // keeps the dark Monaco theme — its AAA treatment applies to shell
+  // chrome; a dedicated hc Monaco theme is not part of v1.2.
+  const editorTheme =
+    resolveTheme(theme, systemScheme) === 'light' ? 'webmars-light' : 'webmars-dark'
 
   const editorRef = useRef<monacoEditor.IStandaloneCodeEditor | null>(null)
   const monacoRef = useRef<Monaco | null>(null)
@@ -217,7 +226,7 @@ export function CodeEditor() {
         height={size.h || '100%'}
         width={size.w || '100%'}
       language="mips"
-      theme="webmars-dark"
+      theme={editorTheme}
       value={source}
       onChange={(value) => setSource(value ?? '')}
       beforeMount={handleBeforeMount}

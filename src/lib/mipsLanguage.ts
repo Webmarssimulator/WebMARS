@@ -226,7 +226,7 @@ const monarchTokens: languages.IMonarchLanguage = {
   },
 }
 
-const themeData = {
+const darkThemeData = {
   base: 'vs-dark' as const,
   inherit: true,
   rules: [
@@ -275,6 +275,56 @@ const themeData = {
   },
 }
 
+// Light sibling of webmars-dark. The hex literals mirror the
+// [data-theme="light"] block in src/ui/tokens.css so the editor and
+// shell shift together when the theme preference is light (or system
+// resolves light).
+const lightThemeData = {
+  base: 'vs' as const,
+  inherit: true,
+  rules: [
+    { token: 'comment',       foreground: 'a1a1aa', fontStyle: 'italic' },   // --ink-3
+    { token: 'keyword',       foreground: '0891b2' },                        // --accent
+    { token: 'number',        foreground: '18181b' },                        // --ink-1
+    { token: 'number.hex',    foreground: '18181b' },
+    { token: 'string',        foreground: '059669' },                        // --ok
+    { token: 'string.escape', foreground: 'd97706' },                        // --warn
+    { token: 'string.quote',  foreground: '059669' },
+    { token: 'directive',     foreground: 'd97706' },                        // --warn
+    { token: 'register',      foreground: '0891b2', fontStyle: 'bold' },     // --accent bold
+    { token: 'label',         foreground: '18181b', fontStyle: 'bold' },     // --ink-1 bold
+    { token: 'identifier',    foreground: '52525b' },                        // --ink-2
+    { token: 'delimiter',     foreground: '52525b' },
+    { token: 'invalid',       foreground: 'dc2626' },                        // --danger
+  ],
+  colors: {
+    'editor.background':                  '#ffffff', // --surface-1
+    'editor.foreground':                  '#18181b', // --ink-1
+    'editorLineNumber.foreground':        '#a1a1aa', // --ink-3
+    'editorLineNumber.activeForeground':  '#18181b',
+    'editor.lineHighlightBackground':     '#f4f4f580', // --surface-2 with 50% alpha
+    'editor.lineHighlightBorder':         '#f4f4f500',
+    'editorCursor.foreground':            '#0891b2', // --accent
+    'editor.selectionBackground':         '#0891b233',
+    'editor.inactiveSelectionBackground': '#0891b21a',
+    'editorIndentGuide.background':       '#e4e4e7', // --column-guide
+    'editorIndentGuide.activeBackground': '#d4d4d8', // --border
+    'editorRuler.foreground':             '#e4e4e7',
+    'editorWidget.background':            '#ffffff', // --surface-elev
+    'editorWidget.border':                '#d4d4d8', // --border
+    'editorHoverWidget.background':       '#ffffff',
+    'editorHoverWidget.border':           '#d4d4d8',
+    'editorBracketMatch.background':      '#0891b222',
+    'editorBracketMatch.border':          '#0891b2',
+    'editorError.foreground':             '#dc2626',
+    'editorWarning.foreground':           '#d97706',
+    'scrollbar.shadow':                   '#00000000',
+    'scrollbarSlider.background':         '#e4e4e780',
+    'scrollbarSlider.hoverBackground':    '#a1a1aa',
+    'scrollbarSlider.activeBackground':   '#a1a1aa',
+  },
+}
+
 const hoverProvider: languages.HoverProvider = {
   provideHover(model, position) {
     const word = model.getWordAtPosition(position)
@@ -307,7 +357,8 @@ export function registerMips(monaco: Monaco): void {
   monaco.languages.register({ id: 'mips', extensions: ['.asm', '.s', '.S', '.mips'], aliases: ['MIPS', 'mips'] })
   monaco.languages.setMonarchTokensProvider('mips', monarchTokens)
   monaco.languages.registerHoverProvider('mips', hoverProvider)
-  monaco.editor.defineTheme('webmars-dark', themeData)
+  monaco.editor.defineTheme('webmars-dark', darkThemeData)
+  monaco.editor.defineTheme('webmars-light', lightThemeData)
 }
 
 export { INSTRUCTION_REFERENCE, MNEMONICS }

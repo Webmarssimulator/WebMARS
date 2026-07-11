@@ -160,7 +160,7 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   ── DYNAMIC IMPLEMENTATION AGENTS (inserted by AGENT 01) ──────────────────────
   AGENT 02 — API Client, Toast System & Env-Aware Base URL ...... ✅ COMPLETE
   AGENT 03 — Editor Persistence Across Refresh .................. ✅ COMPLETE
-  AGENT 04 — Monaco Light Theme + System Preference ............. ⬜ NOT STARTED
+  AGENT 04 — Monaco Light Theme + System Preference ............. ✅ COMPLETE
   AGENT 05 — rem Pseudo-Instruction (Assembler + Tests) ......... ⬜ NOT STARTED
   AGENT 06 — Tools: Bitmap Grid Sizes + Screen Magnifier ........ ⬜ NOT STARTED
   AGENT 07 — Accounts UI: Auth Slice + AuthModal + Toolbar ...... ⬜ NOT STARTED
@@ -221,7 +221,13 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   (files + active tab) persists to webmars:workspace-v1, debounced 250ms
   with beforeunload flush; hydrates on boot; simulator state provably
   excluded (payload keys asserted in test). 4 new tests; 134/134 green;
-  typecheck/lint/build exit 0. PR #43.
+  typecheck/lint/build exit 0. PR #43 merged, main @ e8c6a68.
+  ------------------------------------------------------------------------------
+  [2026-07-10] AGENT 04: Monaco light theme + system preference (REQ-002)
+  done. webmars-light registered; theme prop derived via resolveTheme;
+  'system' option follows matchMedia live; SettingsDialog copy fixed.
+  LIVE browser proof: editor bg rgb(10,10,10)→rgb(255,255,255)→back on
+  radio toggles (playwright + Edge headless). 134/134 green. PR #44.
   ------------------------------------------------------------------------------
 
 ================================================================================
@@ -781,7 +787,29 @@ APPENDIX A-03 — Editor Persistence
   PR # / MAIN COMMIT: PR #43.
 --------------------------------------------------------------------------------
 APPENDIX A-04 — Monaco Light Theme + System Preference
-  STATUS: / DATE: / PER-REQ (002): / BUILD+TEST: / PR #:
+  STATUS: ✅ COMPLETE / DATE: 2026-07-10
+  REQ-002: IMPLEMENTED —
+    src/lib/mipsLanguage.ts: webmars-light theme defined beside
+      webmars-dark (hex mirrors tokens.css [data-theme="light"]); both
+      registered in registerMips.
+    src/hooks/useSimulator.ts: ThemeName gains 'system'; THEMES + persisted
+      validation accept it; resolveTheme(pref, systemScheme) exported.
+    src/hooks/useSystemColorScheme.ts: NEW matchMedia hook with live
+      change listener.
+    src/ui/CodeEditor.tsx: theme prop derived (light → webmars-light;
+      hc → webmars-dark per A-01 interpretation).
+    src/ui/Shell.tsx: data-theme = resolveTheme(...), re-applies live on
+      OS flips. src/App.tsx: Toaster follows resolved theme.
+    src/ui/SettingsDialog.tsx: System radio option added; stale copy
+      ("Editor stays on the dark Monaco theme") corrected.
+  LIVE BROWSER VERIFICATION (playwright-core + Edge headless against
+    npm run dev): Monaco .monaco-editor-background computed color
+    rgb(10,10,10) in dark → rgb(255,255,255) after checking Light in
+    SettingsDialog → rgb(10,10,10) after checking Dark again; data-theme
+    ="light" applied; System resolved to host scheme. Screenshots
+    captured (dark + light) — light shell renders with all 4 options.
+  BUILD+TEST: typecheck 0 / lint 0 / build exit 0 / vitest 134/134.
+  PR # / MAIN COMMIT: PR #44.
 --------------------------------------------------------------------------------
 APPENDIX A-05 — rem Pseudo-Instruction
   STATUS: / DATE: / PER-REQ (023): / BUILD+TEST: / PR #:
@@ -824,7 +852,7 @@ the exact owner action. At AGENT 94 exit: zero ⬜, zero 🔄.
   ID      | PDF PAGE/SECTION | SUMMARY | CATEGORY | OWNER | STATUS | PR # | EVIDENCE
   --------|------------------|---------|----------|-------|--------|------|---------
   REQ-001 | p.5-6 §2.1; p.32 §6.2 | Persist editor source/files/activeFileId across refresh; simulator state NOT persisted; private-mode safe; last-write-wins OK [mechanism per codebase convention, SF5] | FIX | A03 | IMPLEMENTED | #43 | useSimulator.ts workspace helpers + subscribe; persist.test.ts (4 tests)
-  REQ-002 | p.6-7 §2.2; p.33-34 §6.3 | Monaco webmars-light theme; theme preference incl. 'system' w/ live OS tracking; SettingsDialog picker; shell+editor stay in sync [hc keeps dark Monaco] | FIX | A04 | ⬜ | |
+  REQ-002 | p.6-7 §2.2; p.33-34 §6.3 | Monaco webmars-light theme; theme preference incl. 'system' w/ live OS tracking; SettingsDialog picker; shell+editor stay in sync [hc keeps dark Monaco] | FIX | A04 | IMPLEMENTED | #44 | mipsLanguage.ts webmars-light; browser-verified bg #0a0a0a→#ffffff; A-04
   REQ-003 | p.7-8 §2.3 | Backend: DELETE /snippets/{id} owner check, 404 to non-owners | SECURITY | A12 | ⬜ | | pre-exists upstream (verify)
   REQ-004 | p.8 §2.4 | Backend: login failures return 401 'Invalid credentials' (same msg both cases) | FIX | A12 | ⬜ | | pre-exists upstream (verify)
   REQ-005 | p.8-9 §2.5; p.38 §7.1; p.56 §10.1 | Backend secrets: env-var indirection, .env.example, .gitignore, rotation, git-history scrub + force-push + re-clone | SECURITY | A12 | ⬜ | | partial upstream; rotation/scrub = owner
