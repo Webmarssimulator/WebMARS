@@ -171,7 +171,7 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   AGENT 12 — Backend: Verification + Gap PR from Fork ........... ✅ COMPLETE
   ──────────────────────────────────────────────────────────────────────────────
 
-  AGENT 90 — Cross-Cutting Quality Sweep ........................ ⬜ NOT STARTED
+  AGENT 90 — Cross-Cutting Quality Sweep ........................ ✅ COMPLETE
   AGENT 91 — Gap Closure: PDF vs Reality, Q1/Q2/Q3 .............. ⬜ NOT STARTED
   AGENT 92 — Infrastructure & Config via CLI .................... ⬜ NOT STARTED
   AGENT 93 — AI Tooling Disclosure (single-purpose PR) .......... ⬜ NOT STARTED
@@ -294,7 +294,15 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   6 ⛔ BLOCKED on ONE owner action (Landon merges #24 + ./mvnw verify +
   Railway redeploy) plus REQ-005's history scrub (old DB password still
   reachable at 8afb44c/8a6cf1e — §7.1 filter-repo steps; force-push is
-  owner-approved-only). Frontend doc PR #62.
+  owner-approved-only). Frontend doc PR #62 merged, main @ 60180a4.
+  ------------------------------------------------------------------------------
+  [2026-07-10] AGENT 90: quality sweep done. Contrast MEASURED — ink-3
+  (2.42) upgraded to ink-2 (7.37) across this run's components; light
+  --danger deepened to #b91c1c (4.39→5.89). Coarse-pointer 44px dialog
+  targets added to tokens.css. Secret scan clean; no dangerous sinks;
+  audit = 8 pre-existing baseline vulns only (sonner clean). Bundle
+  growth explained (+33 kB sonner, +42 kB features). REQ-008 flipped.
+  138/138 green. PR #63.
   ------------------------------------------------------------------------------
 
 ================================================================================
@@ -1171,8 +1179,61 @@ APPENDIX A-12 — Backend Verification + Gap PR
       leaked value / rotate it.
   PR # / MAIN COMMIT (this doc update): PR #62.
 --------------------------------------------------------------------------------
-(APPENDIX A blocks for agents 90–94 are filled as those agents complete,
-using the A-90..A-94 field lists from the source master prompt.)
+APPENDIX A-90 — Cross-Cutting Quality Sweep
+  STATUS: ✅ COMPLETE / DATE: 2026-07-10
+  TOKEN SWEEP: all new components consume the tokens.css/Tailwind bridge
+    (text-ink-*, bg-surface-*, border-divider, accent/ok/warn/danger,
+    rounded-sm/pill); arbitrary values limited to the codebase's own
+    established idioms (text-[10px]/[11px] micro-type, z-[60..90]
+    layering). No new magic-color literals (evidence: components reviewed
+    file-by-file; hex appears only in tokens.css + mipsLanguage.ts theme
+    data, the documented exception).
+  A11Y: keyboard walkthroughs in A-11 (trap/Escape/Enter). CONTRAST
+    MEASURED (WCAG relative-luminance script; ratios in output):
+    ink-1 18.09 ✓, ink-2 7.37 ✓, accent 10.45 ✓, ok 7.44 ✓, warn 8.79 ✓,
+    danger-on-surface-2 4.62 ✓ (dark), accent-button 10.96 ✓,
+    danger-button 5.26 ✓. FAILURES FIXED: ink-3 (2.42 dark / 2.56 light)
+    was used for meaningful text in this run's new components → upgraded
+    to ink-2 in AuthModal/SaveSnippetDialog/ShareModal/MySnippetsDrawer/
+    PublicFeed/HistoryPanel/ScreenMagnifier hint; light-theme --danger
+    #dc2626 (4.39 on surface-2, sub-AA) → #b91c1c (5.89 ✓, 6.47 on
+    white). Pre-existing shell-wide ink-3 usage (SettingsDialog, panels)
+    left as-is — pre-dates this run; flagged for the team.
+  RESPONSIVE: 375px modal fit + no h-scroll verified (A-11); touch
+    targets: tokens.css @media (pointer: coarse) rule gives dialog
+    buttons/inputs min-height 44px (fixes the A-11 26.7px finding)
+    while keeping desktop density.
+  STATE SWEEP (REQ-008): every async surface this run added has
+    disabled+label busy states and loading/empty/error UI — verified
+    live: AuthModal 'Signing in…', Save 'Saving…' (double-click cannot
+    double-submit: guarded by `if (busy/saving) return` + disabled),
+    ShareModal 'Updating…', drawer/feed/history loading/empty/error
+    with named HTTP status + Retry (A-09/A-10 live evidence).
+  PERF: bundle 417.64 kB baseline → 492.61 kB (gzip 116.94 → 134.80):
+    +33 kB sonner + ~42 kB feature components — explained, no accidental
+    heavy deps (no html2canvas/lodash; verified package.json diff).
+    Render hygiene: magnifier re-clones only on target change; workspace
+    persistence debounced 250ms; no unthrottled scroll/resize handlers
+    added (grep addEventListener over new files: mousemove/keydown/
+    popstate/beforeunload only, all removed on cleanup). No per-frame
+    allocations added to the run loop (logging fires once at run END).
+  SECURITY: secret scan `git log 4c9d661..HEAD -p` over this run's
+    commits for sk_live/AKIA/private-key/ghp_/password= patterns → no
+    matches. Dangerous sinks: grep dangerouslySetInnerHTML|eval( over
+    src → none (magnifier uses cloneNode/appendChild, not string HTML;
+    innerHTML='' only to clear). npm audit: 8 vulnerabilities — ALL
+    pre-existing at the AGENT 00 baseline (3L/2M/1H/2C, e.g. DOMPurify
+    advisory via transitive deps); sonner (the only dep added this run)
+    is not implicated. Pre-existing set surfaced to the owner rather
+    than blind-bumped at the end of the run.
+  DEAD CODE: none introduced by this run's agents; no orphaned flags.
+  BUILD+TEST: lint 0 / typecheck 0 / build exit 0 / vitest 138/138.
+  REGRESSIONS FIXED: contrast + touch-target findings above.
+  BLOCKED ITEMS: none.
+  PR # / MAIN COMMIT: PR #63.
+--------------------------------------------------------------------------------
+(APPENDIX A blocks for agents 91–94 are filled as those agents complete,
+using the A-91..A-94 field lists from the source master prompt.)
 
 ================================================================================
     APPENDIX B — REQUIREMENTS TRACEABILITY MATRIX (AGENT 01 POPULATES)
@@ -1192,7 +1253,7 @@ the exact owner action. At AGENT 94 exit: zero ⬜, zero 🔄.
   REQ-005 | p.8-9 §2.5; p.38 §7.1; p.56 §10.1 | Backend secrets: env-var indirection, .env.example, .gitignore, rotation, git-history scrub + force-push + re-clone | SECURITY | A12 | ⛔ BLOCKED | — | env indirection/JwtUtil validation/.env untracked DONE upstream; OWNER: old DB password still in history (commits 8afb44c, 8a6cf1e) → run §7.1 filter-repo scrub + force-push + re-clone, and rotate/confirm Railway DB password
   REQ-006 | p.9 §2.6; p.46-48 §8.2 | ScreenMagnifier rewrite: DOM-clone loupe 240x160 @2x, hint state, Escape, no per-mousemove reclone, Monaco excluded | FEATURE | A06 | IMPLEMENTED | #46 | ScreenMagnifier.tsx rewrite; browser-verified clone/hint/Escape
   REQ-007 | p.10 §2.7; p.20 D1 | Toast system via sonner; Toaster at App root; error/success toasts for API calls | UI/UX | A02 | IMPLEMENTED | #42 | src/App.tsx (Toaster mount); A-02
-  REQ-008 | p.10 §2.8 | Loading state on every async button: disabled + spinner/label while in flight; no duplicate submits | UI/UX | A90 | ⬜ | | implemented inline by A07-A10; A90 sweeps
+  REQ-008 | p.10 §2.8 | Loading state on every async button: disabled + spinner/label while in flight; no duplicate submits | UI/UX | A90 | IMPLEMENTED | #63 | busy states shipped inline by A07–A10; sweep evidence in A-90
   REQ-009 | p.10-11 §2.9; p.36 §6.6; p.23 D5 | ?snippet=<id> on boot loads snippet into editor; 404 → toast + default example; document title updated | FEATURE | A08 | IMPLEMENTED | #48 | App.tsx useSnippetDeepLink; live 404-toast + fallback verified (A-08)
   REQ-010 | p.11 §2.10; p.26 D8 | JWT expiry 8h (sprint choice) + README v1.3 note re refresh tokens | FIX | A12 | IMPLEMENTED | up#e2a080f | JwtUtil.java 8h verified; v1.3 note ships in webmars-api#24
   REQ-011 | p.11 §2.11; p.39 §7.2; p.56 §10.1 | CORS: prod + localhost origins, methods, headers, credentials, no wildcards | FIX | A12 | IMPLEMENTED | up#e2a080f | SecurityConfig.java verified; proven live by all browser calls this run

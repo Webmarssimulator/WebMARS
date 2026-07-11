@@ -31,7 +31,7 @@ const STATUS_BADGE: Record<api.ExitStatus, string> = {
   COMPLETED: 'bg-ok/15 text-ok',
   ERROR: 'bg-danger/15 text-danger',
   ABORTED: 'bg-warn/15 text-warn',
-  PAUSED: 'bg-surface-3 text-ink-3',
+  PAUSED: 'bg-surface-3 text-ink-2',
 }
 
 function formatWhen(iso: string): string {
@@ -45,10 +45,10 @@ function formatDuration(ms: number | null): string {
 }
 
 function SectionFallback({ state, onRetry }: { state: SectionState<unknown>; onRetry: () => void }) {
-  if (state.kind === 'loading') return <div className="text-[11px] italic text-ink-3">Loading…</div>
+  if (state.kind === 'loading') return <div className="text-[11px] italic text-ink-2">Loading…</div>
   if (state.kind === 'error') {
     return (
-      <div className="rounded-md border border-divider bg-surface-2 p-2 text-[11px] text-ink-3">
+      <div className="rounded-md border border-divider bg-surface-2 p-2 text-[11px] text-ink-2">
         <div className="text-danger">{state.message}</div>
         <button
           type="button"
@@ -60,7 +60,7 @@ function SectionFallback({ state, onRetry }: { state: SectionState<unknown>; onR
       </div>
     )
   }
-  return <div className="text-[11px] italic text-ink-3">No runs yet.</div>
+  return <div className="text-[11px] italic text-ink-2">No runs yet.</div>
 }
 
 export function HistoryPanel() {
@@ -120,7 +120,7 @@ export function HistoryPanel() {
 
   if (!authToken) {
     return (
-      <div className="rounded-md border border-divider bg-surface-2 p-3 text-xs text-ink-3">
+      <div className="rounded-md border border-divider bg-surface-2 p-3 text-xs text-ink-2">
         <span>Sign in to record and see your run history. </span>
         <button
           type="button"
@@ -134,7 +134,7 @@ export function HistoryPanel() {
   }
 
   if (recent.kind === 'loading' && mostRun.kind === 'loading') {
-    return <div className="p-3 text-xs italic text-ink-3">Loading run history…</div>
+    return <div className="p-3 text-xs italic text-ink-2">Loading run history…</div>
   }
 
   if (
@@ -144,7 +144,7 @@ export function HistoryPanel() {
     mostRun.items.length === 0
   ) {
     return (
-      <div className="rounded-md border border-divider bg-surface-2 p-3 text-xs text-ink-3">
+      <div className="rounded-md border border-divider bg-surface-2 p-3 text-xs text-ink-2">
         Run a saved snippet to see your history here.
       </div>
     )
@@ -153,7 +153,7 @@ export function HistoryPanel() {
   return (
     <div className="flex flex-col gap-3">
       <section>
-        <h4 className="mb-1.5 font-mono text-[10px] uppercase text-ink-3" style={{ letterSpacing: '0.06em' }}>
+        <h4 className="mb-1.5 font-mono text-[10px] uppercase text-ink-2" style={{ letterSpacing: '0.06em' }}>
           Recent Runs
         </h4>
         {recent.kind !== 'ready' || recent.items.length === 0 ? (
@@ -181,7 +181,7 @@ export function HistoryPanel() {
                     {run.exitStatus.toLowerCase()}
                   </span>
                 </div>
-                <div className="mt-0.5 flex items-center gap-2 font-mono text-[10px] text-ink-3">
+                <div className="mt-0.5 flex items-center gap-2 font-mono text-[10px] text-ink-2">
                   <span>{formatWhen(run.startedAt)}</span>
                   <span className="flex-1" />
                   <span>{formatDuration(run.durationMs)}</span>
@@ -193,7 +193,7 @@ export function HistoryPanel() {
       </section>
 
       <section>
-        <h4 className="mb-1.5 font-mono text-[10px] uppercase text-ink-3" style={{ letterSpacing: '0.06em' }}>
+        <h4 className="mb-1.5 font-mono text-[10px] uppercase text-ink-2" style={{ letterSpacing: '0.06em' }}>
           Most Run
         </h4>
         {mostRun.kind !== 'ready' || mostRun.items.length === 0 ? (
@@ -215,7 +215,7 @@ export function HistoryPanel() {
                     ×{entry.runCount}
                   </span>
                 </div>
-                <div className="mt-0.5 font-mono text-[10px] text-ink-3">
+                <div className="mt-0.5 font-mono text-[10px] text-ink-2">
                   last run {formatWhen(entry.lastRun)}
                 </div>
               </li>

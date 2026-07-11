@@ -117,7 +117,7 @@ function SaveSnippetForm() {
           }}
         >
           <label className="flex flex-col gap-1">
-            <span className="font-mono text-[10px] uppercase text-ink-3" style={{ letterSpacing: '0.06em' }}>
+            <span className="font-mono text-[10px] uppercase text-ink-2" style={{ letterSpacing: '0.06em' }}>
               Title
             </span>
             <input
@@ -132,7 +132,7 @@ function SaveSnippetForm() {
           </label>
 
           <fieldset className="flex flex-col gap-1">
-            <legend className="mb-1 font-mono text-[10px] uppercase text-ink-3" style={{ letterSpacing: '0.06em' }}>
+            <legend className="mb-1 font-mono text-[10px] uppercase text-ink-2" style={{ letterSpacing: '0.06em' }}>
               Visibility
             </legend>
             {(
@@ -159,7 +159,7 @@ function SaveSnippetForm() {
                 />
                 <span className="flex-1">
                   <span className="block text-xs text-ink-1">{option.label}</span>
-                  <span className="mt-0.5 block text-[11px] text-ink-3">{option.sub}</span>
+                  <span className="mt-0.5 block text-[11px] text-ink-2">{option.sub}</span>
                 </span>
               </label>
             ))}

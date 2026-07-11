@@ -112,7 +112,7 @@ export function ScreenMagnifier() {
         }}
       />
       {!target && (
-        <div className="flex h-full w-full items-center justify-center px-3 text-center text-[11px] text-ink-3">
+        <div className="flex h-full w-full items-center justify-center px-3 text-center text-[11px] text-ink-2">
           Hover a panel to magnify
         </div>
       )}
