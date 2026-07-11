@@ -1,0 +1,491 @@
+================================================================================
+================================================================================
+
+        WEBMARS — ENHANCEMENT PLAN EXECUTION MASTER PROMPT (V1)
+          Full PDF Plan Ingestion + Complete Implementation + PR Merge
+              PERSISTENT SELF-REFERENCING EXECUTION DOCUMENT
+
+================================================================================
+================================================================================
+
+DOCUMENT VERSION: 1.0
+PREDECESSOR: none (first master prompt for the WebMARS repository)
+SOURCE PLAN: C:\Users\Owner\Downloads\WebMARS-Enhancement-Plan.pdf
+TARGET REPOSITORY: https://github.com/Webmarssimulator/WebMARS.git
+EXECUTION ENVIRONMENT: Claude Code (Fable 5) running inside PowerShell on
+  Windows. All commands in this document are PowerShell-compatible.
+CURRENT APP STATE: see AGENT 00 ground truth in Appendix A-00.
+PURPOSE: Read the WebMARS-Enhancement-Plan.pdf END TO END, extract EVERY
+  SINGLE requirement, enhancement, fix, and detail it contains — every single
+  one — turn each into a tracked agent in this document, and implement all of
+  them until the ENTIRE plan is done, fully working, with evidence. Every
+  agent's work is committed on a branch, pushed, opened as a pull request,
+  and MERGED TO MAIN before moving on.
+TOTAL AGENTS: 7 fixed agents (00, 01, 90, 91, 92, 93, 94) + N dynamic
+  implementation agents (02..NN) that AGENT 01 generates directly from the
+  PDF. N is unknown until the PDF is ingested. The document grows; the loop
+  does not change.
+TARGET END STATE: 100% of the requirements in WebMARS-Enhancement-Plan.pdf
+  implemented and verified with evidence, every requirement traceable in the
+  REQUIREMENTS TRACEABILITY MATRIX (Appendix B) to a merged PR, the project
+  building cleanly, all work merged to main via pull requests, the AI tooling
+  disclosure landed in its own PR, and the FINAL VERIFICATION agent passed.
+
+THE ONLY ACCEPTABLE STOPPING CONDITION: every agent in the PROGRESS LEDGER is
+✅ COMPLETE and AGENT 94 (FINAL VERIFICATION) has passed. Not before. If you
+are reading this mid-session, go to the GOLDEN LOOP below and resume.
+
+================================================================================
+                    THE EXECUTION PROTOCOL — READ THIS FIRST
+================================================================================
+
+This document is your single source of truth. You execute it agent by agent,
+returning to this document after EVERY agent, until everything is finished.
+You do not stop when one agent is done. You do not stop when most agents are
+done. You stop when ALL agents are done and final verification has passed.
+
+THE GOLDEN LOOP — FOLLOW THIS EXACTLY:
+
+  STEP 1.  Open this master document. Find the PROGRESS LEDGER.
+  STEP 2.  Identify the FIRST agent whose status is NOT "✅ COMPLETE".
+  STEP 3.  Read that agent's full section, top to bottom, before touching code.
+  STEP 4.  Execute EVERY task in that agent, in order. No task is optional.
+  STEP 5.  Run the agent's ACCEPTANCE CRITERIA. Every checkbox must pass with
+           real evidence (file:line, command output, build result, described
+           manual test). "It looks right" is NEVER evidence.
+  STEP 6.  If ANY criterion fails, fix the failure and re-run STEP 5. Do not
+           proceed with a failing criterion. Do not soften a criterion to make
+           it pass.
+  STEP 7.  Update the PROGRESS LEDGER (status + dated ledger note) and fill in
+           the agent's Appendix A verification block IN THIS FILE.
+  STEP 8.  Commit on the agent's branch, push, open the PR, MERGE IT TO MAIN,
+           confirm remote main updated, using the GIT + PR WORKFLOW below and
+           the agent's specified commit message.
+  STEP 9.  RETURN TO STEP 1. Immediately. You do NOT stop and wait for
+           permission to continue. Begin the next incomplete agent.
+  STEP 10. When ALL agents 00..NN and 90..93 are ✅ COMPLETE, execute AGENT 94
+           (FINAL VERIFICATION). Only a passing AGENT 94 ends the loop.
+
+RESUME BEHAVIOR: If the session is interrupted, context is lost, or you are
+restarted for any reason — re-open this document, re-read the PROGRESS LEDGER
+and the Appendix A blocks that are already filled, and resume at the FIRST
+incomplete agent.
+
+CRITICAL RULES — THESE OVERRIDE CONVENIENCE, ALWAYS
+
+  R1.  NEVER skip an agent. NEVER reorder agents. The ledger order is the
+       execution order.
+  R2.  NEVER mark an agent ✅ COMPLETE without evidence recorded in its
+       Appendix A block.
+  R3.  NEVER ship mock, placeholder, or hardcoded sample data in production
+       paths. Every async surface gets real loading / empty / error states.
+  R4.  ALWAYS build (and run tests) before declaring an agent complete.
+  R5.  ALWAYS merge to main through a pull request. One branch and one PR per
+       agent. Confirm MERGED before returning to the loop.
+  R6.  NEVER `git push --force` to main. Only `--force-with-lease` on a
+       feature branch created this session, with explicit owner approval.
+  R7.  GIT IDENTITY IS THE OWNER'S. Every commit is authored by the git
+       identity resolved from `git config user.name` / `git config user.email`
+       — Bryan Djenabia + his configured email. NEVER pass `--author`. NEVER
+       set GIT_COMMITTER_NAME/EMAIL. NEVER add a Co-Authored-By trailer
+       naming Claude, Anthropic, or any AI. Disclosure is AGENT 93's job.
+  R8.  VERIFY IDENTITY BEFORE THE FIRST COMMIT of the session. Wrong identity
+       = STOP and surface to owner.
+  R9.  WATCH FOR IDENTITY DRIFT. Any non-owner author/committer appearing =
+       STOP and surface before doing anything else.
+  R10. THE PDF IS THE SPEC. Every REQ ends IMPLEMENTED with a merged PR ref,
+       or ⛔ BLOCKED with a precise owner action. No third state.
+  R11. Genuinely owner-only actions → ⛔ BLOCKED with the EXACT step, then
+       continue the loop.
+  R12. NEVER degrade quality to hit a checkbox. Conflicts between the plan
+       and correctness resolve toward correctness, recorded honestly.
+  R13. Frontend work at senior standards: design tokens, WCAG AA, keyboard
+       navigable, responsive, intentional loading/empty/error/hover states.
+  R14. Security is non-negotiable: sanitize inputs, no secrets, no injection,
+       dependencies audited when touched.
+  R15. This document is under version control. Every ledger/appendix update
+       is committed as part of that agent's PR.
+
+GIT + PR WORKFLOW — ONE BRANCH, ONE PR, ONE MERGE PER AGENT
+
+  git checkout main ; git pull origin main
+  git checkout -b <type>/agent-NN-<short-name>
+  # work
+  git add -A ; git commit -m "<agent's commit message>"
+  git push -u origin <branch>
+  gh pr create --base main --head <branch> --title "<title>" --body "<body>"
+  gh pr merge --squash --delete-branch
+  git checkout main ; git pull origin main
+  gh pr view <n> --json state,mergedAt   # must be MERGED
+
+PDF COVERAGE RULES: P1 read every page; P2 permanent REQ IDs in reading
+order, never renumbered; P3 every REQ in Appendix B with source page,
+summary, category, owner, status, PR, evidence; P4 every REQ owned by
+exactly one dynamic agent; P5 ambiguity resolves to the MORE complete
+interpretation, recorded; P6 AGENT 91 re-reads the PDF cold (Q1/Q2/Q3).
+
+INFRASTRUCTURE VIA CLI: schema changes as migrations via CLI; payments via
+Stripe CLI; secrets via secrets CLI, never committed; deployment as code.
+If none apply, AGENT 92 records that finding and completes trivially.
+
+SESSION START CHECKLIST: S1 open this doc; S2 read ledger notes bottom-up;
+S3 read last two Appendix A blocks (stricter record wins); S4 git checkout
+main + pull + status (dirty tree = investigate); S5 identity check; S6 gh
+auth status; S7 enter the GOLDEN LOOP.
+
+CONTEXT RECOVERY: CR1 this doc; CR2 gh pr list --state merged; CR3 git log
+main; CR4 working tree; CR5 resume only when all agree. Disagreement rule:
+merged PRs > main history > this doc > memory. Fix the doc to match reality.
+
+OWNER INTERACTION: surface immediately for identity issues, unreadable PDF,
+force-push needs, destructive out-of-scope actions. Surface-and-continue
+(⛔) for owner-only actions (gh auth login, live secrets, required human
+reviews). Never surface for permission to continue, progress summaries, or
+decisions this doc already makes. Format: what happened → why it blocks →
+exact owner action → what you're doing meanwhile.
+
+PER-AGENT CHECKLIST: first incomplete agent; section read fully; branch off
+fresh main; every task in order; every criterion evidenced; build+tests
+green NOW; Appendix A filled; Appendix B flipped; ledger line + note; doc
+committed with the work; PR merged + verified; return to STEP 1.
+
+================================================================================
+                              PROGRESS LEDGER
+================================================================================
+
+Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
+
+  AGENT 00 — Environment, Clone & Identity Pre-Flight ........... ✅ COMPLETE
+  AGENT 01 — PDF Ingestion & Requirements Extraction ............ 🔄 IN PROGRESS
+
+  ── DYNAMIC IMPLEMENTATION AGENTS (inserted by AGENT 01) ──────────────────────
+  (AGENT 01 replaces this line with the generated agent list)
+  ──────────────────────────────────────────────────────────────────────────────
+
+  AGENT 90 — Cross-Cutting Quality Sweep ........................ ⬜ NOT STARTED
+  AGENT 91 — Gap Closure: PDF vs Reality, Q1/Q2/Q3 .............. ⬜ NOT STARTED
+  AGENT 92 — Infrastructure & Config via CLI .................... ⬜ NOT STARTED
+  AGENT 93 — AI Tooling Disclosure (single-purpose PR) .......... ⬜ NOT STARTED
+  AGENT 94 — FINAL VERIFICATION + FULL REGRESSION + MERGE ....... ⬜ NOT STARTED
+
+  LEDGER NOTES (append one dated line per completed agent):
+  ------------------------------------------------------------------------------
+  [2026-07-10] AGENT 00: pre-flight complete. Toolchain: git 2.54.0.windows.1,
+  gh 2.92.0 (auth: BryanD17, keyring), node v24.14.0, PowerShell 5.1.26100.
+  Cloned to C:\Users\Owner\dev\WebMARS; default branch main. Identity:
+  user.name="Bryan Djenabia", user.email="bdjenabia5@gmail.com" (owner —
+  verified). PDF: 822,217 bytes, 60 pages, text-extractable, copied to
+  docs/. Ground truth: WebMARS is a web-based MIPS assembly simulator
+  (MARS-style) — React 19 + TypeScript 6 + Vite 8 + Tailwind 4 + Zustand 5 +
+  Monaco editor. Build: `npm install` then `npm run build` (tsc -b && vite
+  build) → exit 0, main bundle 417.64 kB (116.94 kB gzip), CSS 68.61 kB.
+  Tests: `npm test` (vitest) → 14 files, 125/125 passed. Lint: eslint 10
+  (eslint.config.js). CI: .github/workflows/ci.yml. Deploy: vercel.json +
+  docs/VERCEL_DEPLOY.md. Existing docs overlapping the plan: docs/PRD.md,
+  STRETCH_ROADMAP.md, FINAL_REPORT.md, TASKS_LANDON.md, TASKS_ZACHARY.md,
+  DEMO_SCRIPT.md. Baseline npm audit: 8 vulnerabilities (3 low, 2 moderate,
+  1 high, 2 critical) — pre-existing, routed to AGENT 90/92. Src layout:
+  src/core (assembler, simulator, memory, registers, syscalls, instructions),
+  src/ui (~35 components + tokens.css), src/landing, src/hooks, src/lib,
+  src/tests. PR # / main hash: recorded in Appendix A-00 by AGENT 01's
+  commit (squash hash unknowable pre-merge).
+  ------------------------------------------------------------------------------
+
+================================================================================
+          AGENT 00 — ENVIRONMENT, CLONE & IDENTITY PRE-FLIGHT
+================================================================================
+Executed 2026-07-10. See Appendix A-00 for the full verification block and
+the ledger note above for ground truth. Tasks 0.1–0.8 completed as specified
+in the source master prompt (toolchain verify, clone, default-branch check,
+identity verify, PDF verify + copy, ground truth, master doc landed, PR).
+
+================================================================================
+        AGENT 01 — PDF INGESTION & REQUIREMENTS EXTRACTION
+================================================================================
+PRIORITY: CRITICAL (this agent creates the rest of the plan)
+
+TASKS: 1.1 read the PDF end to end (60 pages). 1.2 extract EVERY actionable
+item. 1.3 assign REQ-001.. in reading order; record in Appendix B with page,
+summary, category, owner, status. 1.4 completeness check against the PDF's
+section list; record total REQ count. 1.5 cluster REQs into dynamic agents
+(3–10 REQs each, dependency-ordered). 1.6 generate each agent section with
+concrete tasks, acceptance criteria (one checkbox per REQ), commit message;
+insert ledger lines + Appendix A blocks. 1.7 update TOTAL AGENTS. 1.8 commit
+expanded doc on docs/agent-01-plan-extraction, PR, merge.
+
+ACCEPTANCE: every page read; Appendix B complete with total count; every
+section mapped or annotated no-action; every REQ owned; no placeholder text;
+ledger + appendices inserted; PR merged.
+
+COMMIT MESSAGE: agent-01-v1: extract full Enhancement Plan into REQ matrix +
+dynamic agents
+
+================================================================================
+     (DYNAMIC AGENT SECTIONS 02..NN — INSERTED HERE BY AGENT 01)
+================================================================================
+
+================================================================================
+              AGENT 90 — CROSS-CUTTING QUALITY SWEEP
+================================================================================
+Runs after all dynamic agents. Sweeps every touched surface for: design-token
+consistency (no magic numbers); accessibility (WCAG AA — semantics, keyboard
+reachability + visible focus, measured contrast ≥4.5:1 body / ≥3:1 large,
+prefers-reduced-motion); responsive at ~375/~768/≥1280 (no horizontal leaks,
+touch targets ≥44px); async loading/empty/error states with actionable
+errors; performance (bundle size vs the A-00 baseline, render waste, steady
+frame time on hot surfaces, no per-frame allocations, asset sizes); security
+(secret scan of this run's commits, input validation at touched boundaries,
+audit of deps ADDED this run, no eval/dangerous HTML); dead code removal.
+Findings are FIXED in this agent. Branch fix/agent-90-quality-sweep.
+ACCEPTANCE: all sweeps evidenced (grep results, measured pairs, breakpoints
+checked, bundle numbers, scan output); build+tests green; PR merged.
+COMMIT MESSAGE: agent-90-v1: cross-cutting quality sweep — tokens, a11y,
+responsive, perf, security
+
+================================================================================
+        AGENT 91 — GAP CLOSURE: PDF vs REALITY (Q1 / Q2 / Q3)
+================================================================================
+Adversarial re-check; trusts nothing. Q1: every IMPLEMENTED REQ exercised
+end-to-end against main — failures flip back and get fixed now. Q2: per REQ
+theme, sweep the whole codebase for other instances the PDF didn't spell
+out; fixes recorded as REQ-0xx-EXT-n rows. Q3: cold re-read of all 60 pages
+against Appendix B; unmapped actionable sentences become new REQs (fixed
+here if small, new dynamic agent before 90 if large — 90 then re-runs).
+Also verify every P5 ambiguity took the MORE complete reading. Re-run
+build+tests. Branch fix/agent-91-gap-closure.
+ACCEPTANCE: Q1/Q2/Q3 evidenced per cluster ("nothing found" names the places
+checked); Appendix B exhaustively green or ⛔; build+tests pass; PR merged.
+COMMIT MESSAGE: agent-91-v1: gap closure — Q1/Q2/Q3 sweep of Enhancement
+Plan vs main
+
+================================================================================
+          AGENT 92 — INFRASTRUCTURE & CONFIG VIA CLI
+================================================================================
+Owns every INFRA-category REQ plus deferred infra components: database
+migrations via CLI (idempotent, never edit applied ones), payments via
+Stripe CLI, secrets via secrets CLI (never committed; owner-held keys → ⛔),
+CI green on main (add minimal install/lint/build/test pipeline only if the
+plan asks and none exists), .env.example accurate, README run steps verified
+in a clean shell. If the plan and repo have none of these concerns, verify
+and record that finding as the evidence. Branch chore/agent-92-infra.
+ACCEPTANCE: every INFRA REQ dispositioned with CLI output / N/A + reason /
+⛔ + exact action; no dashboard-only changes; no secrets in history; CI
+green; README verified; PR merged.
+COMMIT MESSAGE: agent-92-v1: infrastructure and config for Enhancement Plan
+via CLI
+
+================================================================================
+      AGENT 93 — AI TOOLING DISCLOSURE (SINGLE-PURPOSE PR)
+================================================================================
+Insert into README.md, between "Acknowledgements" and "License" if those
+exist, otherwise at the bottom, VERBATIM:
+
+  ## AI tools used
+
+  This project was developed with the assistance of Claude Code
+  (Anthropic), used as a code-generation and pair-programming tool.
+
+  The development pattern: I author the project plan, architecture
+  decisions, design tokens, and review every change before it lands
+  on a branch. The AI tooling generates the corresponding
+  implementation under my instructions and commits on my behalf.
+
+  All commits in this repository are authored under my git
+  identity because I plan, direct, review, and accept
+  responsibility for the work. This disclosure exists so that the
+  use of AI tooling is part of the public record of the project.
+
+Branch docs/agent-93-ai-disclosure; the PR contains ONLY the README change;
+PR title EXACTLY: docs: add AI tooling disclosure
+ACCEPTANCE: verbatim wording + placement; PR diff is README-only; exact
+title; owner-authored commit with no trailers; PR merged.
+COMMIT MESSAGE: docs: add AI tooling disclosure
+
+================================================================================
+    AGENT 94 — FINAL VERIFICATION + FULL REGRESSION + MERGE
+================================================================================
+Runs only when all other agents are ✅. 94.1 fresh clone to
+C:\Users\Owner\dev\WebMARS-verify; install/build/run using ONLY documented
+commands; record transcript. 94.2 matrix audit: every REQ IMPLEMENTED w/
+merged PR or justified ⛔; five random Q1 spot-checks per category exercised
+in the fresh clone. 94.3 full test suite on the fresh clone + manual
+end-to-end walkthroughs of primary flows (changed and pre-existing);
+regressions fixed via the loop. 94.4 ledger + appendix audit (no
+placeholders anywhere). 94.5 git history audit: owner-authored, PR-merged,
+zero AI identities/trailers, zero direct-to-main, zero force-pushes.
+94.6 blocked-item report (owner-only items only). 94.7 final ledger note
+(REQ total, PRs merged, build/test status, blocks); branch
+chore/agent-94-final-verification; delete the verify clone.
+ACCEPTANCE: all of the above evidenced; final PR merged. This is the ONLY
+place stopping is permitted.
+COMMIT MESSAGE: agent-94-v1: final verification — full Enhancement Plan
+delivered on main
+
+================================================================================
+        APPENDIX A — PER-AGENT VERIFICATION LOG (FILL AS YOU GO)
+================================================================================
+
+--------------------------------------------------------------------------------
+APPENDIX A-00 — Environment, Clone & Identity Pre-Flight
+  STATUS: ✅ COMPLETE
+  DATE: 2026-07-10
+  TOOLCHAIN VERSIONS: git 2.54.0.windows.1 / gh 2.92.0 / node v24.14.0 /
+    PowerShell 5.1.26100.8655
+  gh auth status: logged in to github.com as BryanD17 (keyring), active,
+    scopes gist/read:org/repo/workflow
+  CLONE LOCATION + DEFAULT BRANCH: C:\Users\Owner\dev\WebMARS ; main
+  git config user.name / user.email: "Bryan Djenabia" / "bdjenabia5@gmail.com"
+  PDF: exists at C:\Users\Owner\Downloads\WebMARS-Enhancement-Plan.pdf,
+    822,217 bytes, 60 pages, text extraction succeeded (pdfjs-dist, 106,609
+    chars), copied to docs\WebMARS-Enhancement-Plan.pdf
+  GROUND TRUTH: MIPS assembly simulator web app. Stack: React 19.2 + TS 6.0 +
+    Vite 8 + Tailwind 4 + Zustand 5 + @monaco-editor/react 4.7. Build:
+    `npm install` ; `npm run build` → exit 0 (bundle 417.64 kB / gzip 116.94
+    kB). Tests: `npm test` → vitest, 14 files, 125/125 pass. Lint: `npm run
+    lint` (eslint 10 flat config). Typecheck: `npm run typecheck`. CI:
+    .github/workflows/ci.yml. Deploy: Vercel (vercel.json). Existing docs:
+    PRD.md, STRETCH_ROADMAP.md, FINAL_REPORT.md, TASKS_LANDON.md,
+    TASKS_ZACHARY.md, DEMO_SCRIPT.md, VERCEL_DEPLOY.md. Baseline npm audit:
+    8 vulns (3L/2M/1H/2C) pre-existing.
+  REGRESSIONS FIXED: n/a
+  BLOCKED ITEMS: none
+  PR # / MAIN COMMIT: PR #TBD (filled by AGENT 01 commit after squash merge)
+--------------------------------------------------------------------------------
+APPENDIX A-01 — PDF Ingestion & Requirements Extraction
+  STATUS: 🔄 IN PROGRESS
+  DATE:
+  PAGES READ / TOTAL PAGES:
+  TOTAL REQs EXTRACTED:
+  SECTIONS WITH NO ACTIONABLE CONTENT:
+  DYNAMIC AGENTS GENERATED:
+  AMBIGUITIES INTERPRETED:
+  REGRESSIONS FIXED: n/a
+  BLOCKED ITEMS:
+  PR # / MAIN COMMIT:
+--------------------------------------------------------------------------------
+(APPENDIX A blocks for dynamic agents and agents 90–94 are inserted by
+AGENT 01 / filled as those agents complete.)
+
+================================================================================
+    APPENDIX B — REQUIREMENTS TRACEABILITY MATRIX (AGENT 01 POPULATES)
+================================================================================
+
+Statuses: ⬜ | 🔄 | IMPLEMENTED | ⛔ BLOCKED. IDs permanent. Interpretation
+notes in [brackets] in the SUMMARY cell. A row flips to IMPLEMENTED only
+when its owning agent's PR is MERGED and evidence is filled. ⛔ rows name
+the exact owner action. At AGENT 94 exit: zero ⬜, zero 🔄.
+
+  ID      | PDF PAGE/SECTION | SUMMARY | CATEGORY | OWNER | STATUS | PR # | EVIDENCE
+  --------|------------------|---------|----------|-------|--------|------|---------
+  (populated by AGENT 01)
+
+================================================================================
+        APPENDIX C — ENGINEERING CONVENTIONS IN FORCE FOR THIS RUN
+================================================================================
+C1 fully typed TS, no unjustified `any`. C2 intent-revealing names. C3 small
+single-purpose functions. C4 errors handled at the actionable boundary,
+never swallowed; user-facing failures actionable. C5 loading/empty/error are
+part of the feature. C6 tokens over magic numbers; new tokens go to the
+source. C7 semantic HTML first; keyboard-operable; AA contrast measured;
+prefers-reduced-motion respected. C8 responsive verified at ~375/~768/≥1280;
+touch targets ≥44px. C9 hot paths allocate nothing per frame; heavy assets
+lazy. C10 changed behavior gets a test where a suite exists (it does:
+vitest). C11 one agent = one branch = one PR; squash merges. C12 docs
+updated in the same agent. C13 validate at boundaries; secrets via env; new
+deps audited. C14 scope hygiene — nearby problems routed to AGENT 91, not
+drive-by patched. Codebase conventions win over these where they conflict;
+note the difference in Appendix A.
+
+================================================================================
+              APPENDIX D — ANTI-PATTERNS (INSTANT CRITERION FAILURES)
+================================================================================
+D1 checkbox on "looks right". D2 placeholder data on production paths.
+D3 softening criteria. D4 direct push to main. D5 force-push to main.
+D6 AI co-author trailers / --author / committer env vars. D7 "out of scope"
+without owner sign-off. D8 fixing one instance and ignoring twins (Q2).
+D9 editing applied migrations. D10 dashboard config with no evidence trail.
+D11 silent scope creep. D12 template placeholders left in the committed doc.
+D13 vague Appendix A prose. D14 stopping between agents to summarize/wait.
+
+================================================================================
+        APPENDIX E — GLOSSARY & CLI QUICK REFERENCE (PowerShell)
+================================================================================
+GOLDEN LOOP = the 10-step cycle. LEDGER = per-agent status board. REQ/MATRIX
+= extracted requirement / Appendix B table. DYNAMIC AGENT = generated by
+AGENT 01. EVIDENCE = file:line, command output, build result, or described
+test. Q1/Q2/Q3 = hold? / other instances? / anything missed? ⛔ = owner-only
+action with the exact step.
+Identity check: git config user.name ; git config user.email
+PR: gh pr create --base main --head <br> --title ... --body ... ;
+gh pr merge --squash --delete-branch ; gh pr view <n> --json state,mergedAt
+History audit: git log --format='%h | %an <%ae> | %cn <%ce> | %s'
+
+================================================================================
+      APPENDIX F — PR BODY TEMPLATE & EVIDENCE FORMATTING STANDARD
+================================================================================
+PR body: ## Agent (NN + loop position) / ## Requirements delivered (REQ list
++ files) / ## What changed and why (3–8 sentences) / ## Evidence summary
+(build, tests, key verifications) / ## Out of scope / follow-ups (routed to
+AGENT 91).
+Evidence: E1 file:line + what it proves. E2 exact command + decisive output
+line. E3 suite counts or described manual test. E4 what rendered, at which
+breakpoint/state. E5 absence claims name where you looked. E6 every line
+re-runnable by a skeptical reader.
+
+================================================================================
+    APPENDIX G — REQ EXTRACTION RUBRIC (FOR AGENT 01)
+================================================================================
+G1 imperatives are REQs. G2 desired-state statements are REQs. G3
+qualitative wishes get measurable interpretations in [brackets]. G4 one REQ
+per table row/list item unless trivially one change. G5 mockups are REQs
+whose visible details are the acceptance checklist. G6 negative requirements
+count (with Q2 sweep before deletion). G7 implied work extracted and marked
+[implied]. G8 non-actionable prose → section annotated "no actionable
+content" for Q3 re-judgment. G9 duplicates become ONE REQ with both pages.
+G10 genuinely undecidable → more complete reading + both readings in the
+note + flag in the ledger note.
+
+================================================================================
+    APPENDIX H — TROUBLESHOOTING KNOWN FAILURE MODES
+================================================================================
+H1 gh unauthenticated → surface "gh auth login", ⛔ merges, keep local
+branches, never push to main. H2 branch protection → fix failing checks;
+human-review requirement is an owner action (⛔, stack next agent's branch
+on the unmerged head, record order). H3 merge conflict → merge origin/main
+into the branch, preserve BOTH intents, rebuild, retest. H4 garbage PDF text
+→ OCR/visual per page; ⛔ only after both fail. H5 CRLF churn → fix
+.gitattributes/autocrlf in its own small commit, restage. H6 identity drift
+→ full stop, --show-origin diagnosis, owner report; amend/reset-author only
+on unpushed work; pushed history rewrite is owner-approved only. H7 baseline
+red build → record; owning agent or AGENT 90 fixes. H8 dependency won't
+install on Windows → documented Windows path, viable alternative recorded,
+⛔ only if no route. H9 tempted to stop → re-read FINAL INSTRUCTION; D14.
+H10 PR merged but local main stale → checkout main, pull, verify before
+branching. H11 master-doc conflict → union both records, no status
+regression, back to strict sequential. H12 scope larger than estimate →
+split NN-a/NN-b in the ledger; splitting defers nothing.
+
+================================================================================
+  APPENDIX I — WORKED EXAMPLES: WHAT A GOOD RECORD LOOKS LIKE
+================================================================================
+Model ledger note: "[date] AGENT 03: <cluster> (REQ-009..013) done. PR #14
+merged, main @ a1b2c3d. <one measurable proof>. <interpretation notes>. No
+blocks." Model evidence line: "REQ-016: IMPLEMENTED — src/...:L40-L118 (new
+pass), verified: <re-runnable check>. Build: npm run build → exit 0." Bad:
+"done, looks much better now." Model ⛔ row names the exact owner command.
+The bar: a stranger could resume — or audit — the run from these lines alone.
+
+================================================================================
+
+  FINAL INSTRUCTION — READ THIS EVERY TIME YOU FINISH AN AGENT
+
+  Return to the GOLDEN LOOP. Open the PROGRESS LEDGER. Take the FIRST agent
+  that is not ✅ COMPLETE and execute it fully, with evidence, then commit,
+  push, open the PR, and MERGE TO MAIN. Then come back here and do it again.
+  You stop when EVERY agent is ✅, AGENT 94 has passed, and every requirement
+  on WebMARS-Enhancement-Plan.pdf is delivered on main with evidence, or
+  ⛔ BLOCKED with the exact owner action.
+
+  Do not stop until every agent is ✅.
+
+================================================================================
