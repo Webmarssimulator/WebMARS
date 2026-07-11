@@ -18,3 +18,12 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+      # Enhancement Plan §10.3 mitigation: fail the build if anything
+      # matching a known secret pattern lands in the tree.
+      - name: Secret pattern scan
+        run: |
+          if grep -rInE "sk_live_[A-Za-z0-9]+|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|BEGIN (RSA|EC|OPENSSH) PRIVATE KEY" \
+            --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude=ci.yml .; then
+            echo "::error::Potential secret material found in the tree."
+            exit 1
+          fi
