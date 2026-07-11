@@ -64,7 +64,7 @@ export function MessagesPanel() {
   const clearMessages = useSimulator((s) => s.clearMessages)
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div data-magnify-region className="flex h-full min-h-0 flex-col">
       <div
         className="flex h-6 flex-none items-center gap-2 border-b border-divider px-2 font-mono text-[10px] uppercase text-ink-3"
         style={{ letterSpacing: '0.06em' }}

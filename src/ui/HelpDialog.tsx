@@ -245,6 +245,22 @@ export function HelpDialog() {
                     <li>Issues: <a className="text-accent hover:underline" href={ISSUES_URL} target="_blank" rel="noopener noreferrer">{ISSUES_URL}</a></li>
                     <li>License: MIT</li>
                   </ul>
+                  <h3 className="mt-2 text-sm text-ink-1">Tools</h3>
+                  <ul className="list-disc pl-5 space-y-1">
+                    <li>
+                      <span className="text-ink-1">Bitmap Display</span> — renders a
+                      memory region as pixels. Grid sizes from 8×8 (64 pixels — ideal
+                      for hand-crafted sprites) through 256×256.
+                    </li>
+                    <li>
+                      <span className="text-ink-1">Screen Magnifier</span> — a 2×
+                      loupe that follows the cursor over the register tables, memory
+                      panel, console, messages, symbols, breakpoints, and status bar.
+                      The code editor is intentionally not magnified (its virtual DOM
+                      doesn't clone stably) — use OS-level zoom (Ctrl/Cmd&nbsp;+&nbsp;Plus)
+                      to enlarge code. Escape closes the loupe.
+                    </li>
+                  </ul>
                   <h3 className="mt-2 text-sm text-ink-1">Team</h3>
                   <p>Bryan Djenabia (UI, integration, deployment), Landon Clay (assembler and parser), Zachary Gass (simulator and execution).</p>
                 </div>

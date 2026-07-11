@@ -106,7 +106,7 @@ export function SymbolsPanel() {
   }, [entries])
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div data-magnify-region className="flex h-full min-h-0 flex-col">
       <div
         className="flex h-7 flex-none items-center justify-between border-b border-divider px-3 font-mono text-[10px] uppercase text-ink-3"
         style={{ letterSpacing: '0.06em' }}

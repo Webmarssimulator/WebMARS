@@ -27,7 +27,7 @@ export function FpuRegisterTable() {
   const numberBase  = useSimulator((s) => s.numberBase)
 
   return (
-    <div className="flex flex-col gap-2">
+    <div data-magnify-region className="flex flex-col gap-2">
       <div
         className="flex items-center justify-between font-mono text-[10px] uppercase text-ink-3"
         style={{ letterSpacing: '0.06em' }}

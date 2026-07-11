@@ -169,7 +169,7 @@ export function RegisterTable() {
     : 0
 
   return (
-    <div className="space-y-3">
+    <div data-magnify-region className="space-y-3">
       <BaseToggle />
 
       <div className="overflow-hidden rounded-md border border-divider bg-surface-1 font-mono">
