@@ -234,7 +234,14 @@ standard we verify correctness against.
 ## AI tools used
 
 This project was developed with the assistance of Claude Code
-(Anthropic) as a pair-programming tool. All commits are authored under our git
-identity because we planned, directed, coded, reviewed, and accept
-responsibility for the work. The Day 1 plan and execution prompts
-are tracked in `docs/` for transparency.
+(Anthropic), used as a code-generation and pair-programming tool.
+
+The development pattern: I author the project plan, architecture
+decisions, design tokens, and review every change before it lands
+on a branch. The AI tooling generates the corresponding
+implementation under my instructions and commits on my behalf.
+
+All commits in this repository are authored under my git
+identity because I plan, direct, review, and accept
+responsibility for the work. This disclosure exists so that the
+use of AI tooling is part of the public record of the project.
