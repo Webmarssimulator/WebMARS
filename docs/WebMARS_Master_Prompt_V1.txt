@@ -166,7 +166,7 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   AGENT 07 — Accounts UI: Auth Slice + AuthModal + Toolbar ...... ✅ COMPLETE
   AGENT 08 — Save, Share & Deep Links (?snippet=<id>) ........... ✅ COMPLETE
   AGENT 09 — My Snippets Drawer + Public Feed ................... ✅ COMPLETE
-  AGENT 10 — Run History: Logging Hook + HistoryPanel ........... ⬜ NOT STARTED
+  AGENT 10 — Run History: Logging Hook + HistoryPanel ........... ✅ COMPLETE
   AGENT 11 — Polish, A11y, Docs, Tests Completion, v1.3 Issues .. ⬜ NOT STARTED
   AGENT 12 — Backend: Verification + Gap PR from Fork ........... ⬜ NOT STARTED
   ──────────────────────────────────────────────────────────────────────────────
@@ -265,7 +265,16 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   (REQ-036 base). Live: empty state + discovery link + error states
   verified; ready-state proven with route mocks (rows, badges, load,
   delete round-trip, pagination). ⚠ Upstream DELETE also 500s (same
-  lazy-proxy bug) — A12 scope grows. 138/138 green. PR #49.
+  lazy-proxy bug) — A12 scope grows. 138/138 green. PR #49 merged, main
+  @ 7c5b706.
+  ------------------------------------------------------------------------------
+  [2026-07-10] AGENT 10: run history (REQ-030/034) done. Fire-and-forget
+  logging wired to all run-end paths (COMPLETED/ERROR/ABORTED-on-reset);
+  HistoryPanel accordion w/ per-section states. LIVE: anonymous runs
+  never POST; authed run POSTs; Most Run shows real production data;
+  Recent Runs isolates its upstream-500 error with Retry. Upstream bug
+  matrix completed: POST /runs private→500 public→200; recent→500 w/
+  rows; most-run→200. 138/138 green. PR #50.
   ------------------------------------------------------------------------------
 
 ================================================================================
@@ -997,7 +1006,33 @@ APPENDIX A-09 — My Snippets + Public Feed
   PR # / MAIN COMMIT: PR #49.
 --------------------------------------------------------------------------------
 APPENDIX A-10 — Run History
-  STATUS: / DATE: / PER-REQ (030/034): / BUILD+TEST: / PR #:
+  STATUS: ✅ COMPLETE / DATE: 2026-07-10
+  REQ-030: IMPLEMENTED — useSimulator.ts: logRunIfPossible fire-and-forget
+    helper (skips when signed out or snippet unsaved; console.warn on
+    failure; never blocks the simulator); _runStartedAt stamped at run()
+    start for durationMs; wired to run() halt → COMPLETED, run()/step()
+    catch → ERROR (with message), step()-to-halt → COMPLETED, reset()
+    while running → ABORTED [interpretation: Reset mid-run is the user
+    abort; Pause is resumable and logs nothing]; runLogVersion bump
+    refreshes an open HistoryPanel after each successful POST.
+    LIVE: anonymous run → ZERO /runs requests + program output intact
+    (never blocked); authed run of a saved snippet → POST /runs fired.
+  REQ-034: IMPLEMENTED — src/ui/HistoryPanel.tsx in a 'Run History'
+    RightPanel accordion: Recent Runs (color-coded status badges
+    ok/danger/warn, duration ms/s, timestamp) + Most Run (×count, last
+    run); click loads the snippet; exact empty copy 'Run a saved snippet
+    to see your history here.'; per-SECTION loading/empty/error states so
+    one failing endpoint can't blank the other's data.
+    LIVE: Most Run renders REAL production data ('qa-a10-public-runlog
+    ×1'); Recent Runs shows its own named error (HTTP 500) + Retry;
+    empty state verified before any runs existed.
+  ⚠ UPSTREAM (adds to the A-08/A-09 finding, routed to A12): POST /runs
+    500s for PRIVATE snippets (visibility check touches the lazy owner
+    proxy) but works for PUBLIC (200, verified: RunResponse id 1); GET
+    /runs/recent 500s once rows exist (RunResponse.from touches the lazy
+    snippet proxy); GET /runs/most-run works (interface projection).
+  BUILD+TEST: typecheck 0 / lint 0 / build exit 0 / vitest 138/138.
+  PR # / MAIN COMMIT: PR #50.
 --------------------------------------------------------------------------------
 APPENDIX A-11 — Polish, A11y, Docs, Tests, Issues
   STATUS: / DATE: / PER-REQ (031/035/036/037/039/040/042/046/047): /
@@ -1051,11 +1086,11 @@ the exact owner action. At AGENT 94 exit: zero ⬜, zero 🔄.
   REQ-027 | p.43-44 §7.6; p.25 D7 | RunController: POST /runs (user from JWT, never from body), GET /runs/recent, GET /runs/most-run, limit caps [+upstream audit C2: add visibility check on POST] | FEATURE | A12 | ⬜ | | pre-exists; C2 fix → fork PR
   REQ-028 | p.46 §8.1; p.20 D1 | BitmapDisplay DIMENSION_OPTIONS gains 8 and 16; existing sizes unaffected | FEATURE | A06 | IMPLEMENTED | #46 | BitmapDisplay.tsx:16; browser-verified option list
   REQ-029 | p.47 §8.2; p.21 D2 | data-magnify-region on RegisterTable, MemoryPanel, ConsolePanel, StatusBar, FpuRegisterTable (+small-text panels); Monaco excluded | FEATURE | A06 | IMPLEMENTED | #46 | 8 panels tagged; A-06
-  REQ-030 | p.49 §8.3; p.25 D6 | Run-logging hook: fire-and-forget at run end (COMPLETED/ERROR/ABORTED), runStartedAt duration, skip unauth/unsaved, never block simulator | FEATURE | A10 | ⬜ | |
+  REQ-030 | p.49 §8.3; p.25 D6 | Run-logging hook: fire-and-forget at run end (COMPLETED/ERROR/ABORTED), runStartedAt duration, skip unauth/unsaved, never block simulator | FEATURE | A10 | IMPLEMENTED | #50 | useSimulator logRunIfPossible; live anonymous-skip + authed-POST evidence in A-10
   REQ-031 | p.51-52 §8.5; p.53 §9.2 | Frontend tests: api.test.ts, persist.test.ts, rem assembler tests in existing harness | TEST | A11 | ⬜ | | authored by A02/A03/A05; A11 verifies completeness
   REQ-032 | p.24-25 D6 | MySnippetsDrawer: /mine list w/ title/updated/visibility badge, click-to-load, edit-in-place title, delete w/ confirm, New Snippet button, currentSnippetId persists | FEATURE | A09 | IMPLEMENTED | #49 | MySnippetsDrawer.tsx; live+mock evidence in A-09
   REQ-033 | p.25 D7 | Public feed: paginated browser (title/owner/updated, Prev/Next/page) + 'See public snippets' discovery link in drawer empty state | FEATURE | A09 | IMPLEMENTED | #49 | PublicFeed.tsx; live+mock evidence in A-09
-  REQ-034 | p.26 D8 | HistoryPanel tab in right inspector: Recent Runs (color-coded status, duration, timestamp) + Most Run (count, last run); click loads snippet | FEATURE | A10 | ⬜ | |
+  REQ-034 | p.26 D8 | HistoryPanel tab in right inspector: Recent Runs (color-coded status, duration, timestamp) + Most Run (count, last run); click loads snippet | FEATURE | A10 | IMPLEMENTED | #50 | HistoryPanel.tsx; live Most-Run real data + per-section states in A-10
   REQ-035 | p.26-27 D9 | Empty states w/ exact copy: drawer 'Save your first snippet…', history 'Run a saved snippet…', feed 'No public snippets yet. Be the first.' | UI/UX | A11 | ⬜ | |
   REQ-036 | p.27 D9 | Confirm dialogs for deletes: 'Delete <title>? This cannot be undone.' [Cancel][Delete] | UI/UX | A11 | ⬜ | |
   REQ-037 | p.27 D9 | AuthModal/ShareModal/confirm dialogs: focus trap, Escape closes, Enter submits | UI/UX | A11 | ⬜ | |
