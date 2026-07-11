@@ -133,7 +133,7 @@ export function ShareModal() {
                   {visibility === 'PUBLIC' ? 'Public' : 'Private'}
                 </span>
               </div>
-              <div className="mt-0.5 text-[11px] text-ink-3">
+              <div className="mt-0.5 text-[11px] text-ink-2">
                 {visibility === 'PUBLIC'
                   ? 'Anyone with the link can open it.'
                   : 'Only you can open it — the link 404s for everyone else.'}

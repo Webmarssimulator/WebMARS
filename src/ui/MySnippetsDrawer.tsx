@@ -118,7 +118,7 @@ export function MySnippetsDrawer() {
 
   if (!authToken) {
     return (
-      <div className="rounded-md border border-divider bg-surface-2 p-3 text-xs text-ink-3">
+      <div className="rounded-md border border-divider bg-surface-2 p-3 text-xs text-ink-2">
         <span>Sign in to save snippets to your account. </span>
         <button
           type="button"
@@ -132,12 +132,12 @@ export function MySnippetsDrawer() {
   }
 
   if (state.kind === 'loading' || state.kind === 'idle') {
-    return <div className="p-3 text-xs italic text-ink-3">Loading your snippets…</div>
+    return <div className="p-3 text-xs italic text-ink-2">Loading your snippets…</div>
   }
 
   if (state.kind === 'error') {
     return (
-      <div className="rounded-md border border-divider bg-surface-2 p-3 text-xs text-ink-3">
+      <div className="rounded-md border border-divider bg-surface-2 p-3 text-xs text-ink-2">
         <div className="text-danger">{state.message}</div>
         <button
           type="button"
@@ -161,7 +161,7 @@ export function MySnippetsDrawer() {
       </button>
 
       {state.snippets.length === 0 ? (
-        <div className="rounded-md border border-divider bg-surface-2 p-3 text-xs text-ink-3">
+        <div className="rounded-md border border-divider bg-surface-2 p-3 text-xs text-ink-2">
           <div>Save your first snippet to see it here.</div>
           <button
             type="button"
@@ -215,7 +215,7 @@ export function MySnippetsDrawer() {
                 <span
                   className={cn(
                     'flex-none rounded-pill px-1.5 py-0.5 font-mono text-[9px] uppercase',
-                    snippet.visibility === 'PUBLIC' ? 'bg-ok/15 text-ok' : 'bg-surface-3 text-ink-3',
+                    snippet.visibility === 'PUBLIC' ? 'bg-ok/15 text-ok' : 'bg-surface-3 text-ink-2',
                   )}
                   style={{ letterSpacing: '0.05em' }}
                 >
@@ -223,7 +223,7 @@ export function MySnippetsDrawer() {
                 </span>
               </div>
               <div className="mt-0.5 flex items-center gap-2">
-                <span className="font-mono text-[10px] text-ink-3">{formatWhen(snippet.updatedAt)}</span>
+                <span className="font-mono text-[10px] text-ink-2">{formatWhen(snippet.updatedAt)}</span>
                 <span className="flex-1" />
                 <button
                   type="button"
@@ -231,14 +231,14 @@ export function MySnippetsDrawer() {
                     setEditingId(snippet.id)
                     setEditingTitle(snippet.title ?? '')
                   }}
-                  className="text-[10px] text-ink-3 hover:text-ink-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  className="text-[10px] text-ink-2 hover:text-ink-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                 >
                   Rename
                 </button>
                 <button
                   type="button"
                   onClick={() => setPendingDelete(snippet)}
-                  className="text-[10px] text-ink-3 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  className="text-[10px] text-ink-2 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                 >
                   Delete
                 </button>

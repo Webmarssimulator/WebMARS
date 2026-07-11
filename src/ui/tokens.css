@@ -66,7 +66,9 @@
 
   --accent: #0891b2;
   --warn:   #d97706;
-  --danger: #dc2626;
+  /* #b91c1c (not #dc2626): measured 4.39:1 on --surface-2 at #dc2626 —
+     just under the WCAG AA 4.5:1 floor for small error text. */
+  --danger: #b91c1c;
   --ok:     #059669;
 
   --shadow-press: inset 0 1px 2px rgba(0, 0, 0, 0.08);
@@ -92,6 +94,18 @@
   --warn:   #ffd700;
   --danger: #ff5555;
   --ok:     #00ff7f;
+}
+
+/* ─ touch ergonomics ─────────────────────────────────────────────────
+   On touch-primary devices, dialog buttons and inputs meet the 44px
+   minimum target size (WCAG 2.5.8 / Enhancement Plan C8). Pointer-fine
+   desktops keep the IDE's compact density. */
+@media (pointer: coarse) {
+  [role='dialog'] button,
+  [role='alertdialog'] button,
+  [role='dialog'] input {
+    min-height: 44px;
+  }
 }
 
 /* ─ animations ─────────────────────────────────────────────────────── */

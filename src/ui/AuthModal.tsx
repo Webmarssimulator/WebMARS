@@ -135,7 +135,7 @@ export function AuthModal() {
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent',
                 mode === m
                   ? 'bg-surface-2 text-ink-1'
-                  : 'text-ink-3 hover:bg-surface-2 hover:text-ink-2',
+                  : 'text-ink-2 hover:bg-surface-2 hover:text-ink-2',
               )}
             >
               {m === 'login' ? 'Sign in' : 'Register'}
@@ -151,7 +151,7 @@ export function AuthModal() {
           }}
         >
           <label className="flex flex-col gap-1">
-            <span className="font-mono text-[10px] uppercase text-ink-3" style={{ letterSpacing: '0.06em' }}>
+            <span className="font-mono text-[10px] uppercase text-ink-2" style={{ letterSpacing: '0.06em' }}>
               Username
             </span>
             <input
@@ -167,7 +167,7 @@ export function AuthModal() {
             />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="font-mono text-[10px] uppercase text-ink-3" style={{ letterSpacing: '0.06em' }}>
+            <span className="font-mono text-[10px] uppercase text-ink-2" style={{ letterSpacing: '0.06em' }}>
               Password
             </span>
             <input

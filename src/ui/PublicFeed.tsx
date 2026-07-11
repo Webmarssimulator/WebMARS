@@ -66,12 +66,12 @@ export function PublicFeed() {
   }
 
   if (state.kind === 'loading') {
-    return <div className="p-3 text-xs italic text-ink-3">Loading public snippets…</div>
+    return <div className="p-3 text-xs italic text-ink-2">Loading public snippets…</div>
   }
 
   if (state.kind === 'error') {
     return (
-      <div className="rounded-md border border-divider bg-surface-2 p-3 text-xs text-ink-3">
+      <div className="rounded-md border border-divider bg-surface-2 p-3 text-xs text-ink-2">
         <div className="text-danger">{state.message}</div>
         <button
           type="button"
@@ -89,7 +89,7 @@ export function PublicFeed() {
   return (
     <div className="flex flex-col gap-2">
       {page.content.length === 0 ? (
-        <div className="rounded-md border border-divider bg-surface-2 p-3 text-xs text-ink-3">
+        <div className="rounded-md border border-divider bg-surface-2 p-3 text-xs text-ink-2">
           No public snippets yet. Be the first.
         </div>
       ) : (
@@ -104,7 +104,7 @@ export function PublicFeed() {
               >
                 {snippet.title ?? `snippet-${snippet.id}`}
               </button>
-              <div className="mt-0.5 flex items-center gap-2 font-mono text-[10px] text-ink-3">
+              <div className="mt-0.5 flex items-center gap-2 font-mono text-[10px] text-ink-2">
                 <span>{snippet.owner?.username ?? 'unknown'}</span>
                 <span className="flex-1" />
                 <span>{formatWhen(snippet.updatedAt)}</span>
@@ -124,7 +124,7 @@ export function PublicFeed() {
           >
             ← Previous
           </button>
-          <span className="font-mono text-[10px] text-ink-3">
+          <span className="font-mono text-[10px] text-ink-2">
             Page {page.number + 1} of {page.totalPages}
           </span>
           <button
