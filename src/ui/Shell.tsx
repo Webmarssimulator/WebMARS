@@ -12,6 +12,7 @@ import { SourcePane } from './SourcePane.tsx'
 import { StatusBar } from './StatusBar.tsx'
 import { DevPanel } from './DevPanel.tsx'
 import { SettingsDialog } from './SettingsDialog.tsx'
+import { AuthModal } from './AuthModal.tsx'
 import { CommandPalette } from './CommandPalette.tsx'
 import { InstructionCounter } from './InstructionCounter.tsx'
 import { HelpDialog } from './HelpDialog.tsx'
@@ -101,6 +102,7 @@ export function Shell() {
     return (
       <>
         <MobileShell />
+        <AuthModal />
         {import.meta.env.DEV && <DevPanel />}
       </>
     )
@@ -162,6 +164,7 @@ export function Shell() {
       </div>
       {import.meta.env.DEV && <DevPanel />}
       <SettingsDialog />
+      <AuthModal />
       <CommandPalette />
       <InstructionCounter />
       <HelpDialog />

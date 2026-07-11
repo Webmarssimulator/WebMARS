@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { TOKEN_STORAGE_KEY, USERNAME_STORAGE_KEY } from '../lib/api.ts'
 import { Simulator } from '../core/simulator.ts'
 import { assemble } from '../core/instructions.ts'
 import { REGISTER_NAMES } from '../core/registers.ts'
@@ -283,6 +284,29 @@ function makeFileId(): string {
     return crypto.randomUUID()
   }
   return `file-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+}
+
+// ─ auth persistence (Enhancement Plan §6.4) ─
+//
+// Keys shared with src/lib/api.ts, which reads webmars.token on every
+// request to attach the Authorization header.
+
+function readAuthValue(key: string): string | null {
+  try {
+    return typeof window === 'undefined' ? null : window.localStorage.getItem(key)
+  } catch {
+    return null
+  }
+}
+
+function writeAuthValue(key: string, value: string | null): void {
+  try {
+    if (typeof window === 'undefined') return
+    if (value === null) window.localStorage.removeItem(key)
+    else window.localStorage.setItem(key, value)
+  } catch {
+    // ignore — privacy mode; the session just won't survive a refresh
+  }
 }
 
 // ─ workspace persistence ─
@@ -721,6 +745,17 @@ interface SimulatorStoreState {
   commandPaletteOpen: boolean
   openCommandPalette:  () => void
   closeCommandPalette: () => void
+
+  // ─ auth slice (Enhancement Plan §6.4; token/username persisted to
+  //   webmars.token / webmars.username — the same keys src/lib/api.ts
+  //   reads to attach the Authorization header) ─
+  authToken: string | null
+  authUsername: string | null
+  authModalOpen: boolean
+  setAuth: (token: string, username: string) => void
+  clearAuth: () => void
+  openAuthModal: () => void
+  closeAuthModal: () => void
 
   // ─ layoutSizes slice (Phase 3 SA-5; persisted to webmars:layout-sizes) ─
   // Drag-handle sizes for the three resizable Shell regions. The
@@ -1319,6 +1354,24 @@ export const useSimulator = create<SimulatorStoreState>((set, get) => {
     commandPaletteOpen: false,
     openCommandPalette:  () => set({ commandPaletteOpen: true  }),
     closeCommandPalette: () => set({ commandPaletteOpen: false }),
+
+    // auth slice — token/username mirror localStorage so api.ts (which
+    // reads webmars.token directly) and the UI stay in sync.
+    authToken: readAuthValue(TOKEN_STORAGE_KEY),
+    authUsername: readAuthValue(USERNAME_STORAGE_KEY),
+    authModalOpen: false,
+    setAuth: (token, username) => {
+      writeAuthValue(TOKEN_STORAGE_KEY, token)
+      writeAuthValue(USERNAME_STORAGE_KEY, username)
+      set({ authToken: token, authUsername: username })
+    },
+    clearAuth: () => {
+      writeAuthValue(TOKEN_STORAGE_KEY, null)
+      writeAuthValue(USERNAME_STORAGE_KEY, null)
+      set({ authToken: null, authUsername: null })
+    },
+    openAuthModal:  () => set({ authModalOpen: true  }),
+    closeAuthModal: () => set({ authModalOpen: false }),
 
     layoutSizes: readPersistedLayoutSizes(),
     setLayoutSize: (key, value) => {

@@ -54,6 +54,9 @@ function Drawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const openHelp        = useSimulator((s) => s.openHelp)
   const setTheme        = useSimulator((s) => s.setTheme)
   const theme           = useSimulator((s) => s.theme)
+  const authUsername    = useSimulator((s) => s.authUsername)
+  const openAuthModal   = useSimulator((s) => s.openAuthModal)
+  const clearAuth       = useSimulator((s) => s.clearAuth)
 
   if (!open) return null
 
@@ -93,10 +96,18 @@ function Drawer({ open, onClose }: { open: boolean; onClose: () => void }) {
           <DrawerItem label="Syscall I/O"    onClick={() => { loadFromExample('syscallIO');   close() }} />
           <DrawerItem label="Float Math"     onClick={() => { loadFromExample('floatMath');   close() }} />
 
+          <DrawerSection title="Account" />
+          {authUsername === null ? (
+            <DrawerItem label="Sign in" onClick={() => { openAuthModal(); close() }} />
+          ) : (
+            <DrawerItem label={`Log out (${authUsername})`} onClick={() => { clearAuth(); close() }} />
+          )}
+
           <DrawerSection title="Theme" />
           <DrawerItem label={`Dark${theme==='dark'?' ✓':''}`}            onClick={() => { setTheme('dark') }} />
           <DrawerItem label={`Light${theme==='light'?' ✓':''}`}          onClick={() => { setTheme('light') }} />
           <DrawerItem label={`High Contrast${theme==='hc'?' ✓':''}`}     onClick={() => { setTheme('hc') }} />
+          <DrawerItem label={`System${theme==='system'?' ✓':''}`}       onClick={() => { setTheme('system') }} />
 
           <DrawerSection title="Other" />
           <DrawerItem label="Settings"           onClick={() => { openSettings(); close() }} />

@@ -203,6 +203,104 @@ function Divider() {
   return <span aria-hidden="true" className="mx-1 h-6 w-px bg-divider" />
 }
 
+// Enhancement Plan §6.4: Sign-in affordance. Logged out → a "Sign in"
+// button opening the AuthModal. Logged in → the username with a small
+// menu holding "Log out". Mirrors the ExamplesDropdown portal pattern.
+function AuthMenu() {
+  const authUsername  = useSimulator((s) => s.authUsername)
+  const openAuthModal = useSimulator((s) => s.openAuthModal)
+  const clearAuth     = useSimulator((s) => s.clearAuth)
+  const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node
+      if (
+        buttonRef.current && !buttonRef.current.contains(target) &&
+        menuRef.current && !menuRef.current.contains(target)
+      ) {
+        setOpen(false)
+      }
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setOpen(false)
+    }
+    window.addEventListener('mousedown', handleClickOutside)
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('mousedown', handleClickOutside)
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [open])
+
+  useLayoutEffect(() => {
+    if (!open || !buttonRef.current) return
+    const rect = buttonRef.current.getBoundingClientRect()
+    setPos({ left: Math.max(8, rect.right - 160), top: rect.bottom + 4 })
+  }, [open])
+
+  if (!authUsername) {
+    return (
+      <button
+        type="button"
+        onClick={openAuthModal}
+        className="mr-1 rounded-sm bg-surface-2 px-2 py-1 text-xs font-medium text-ink-1 transition-colors hover:bg-surface-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      >
+        Sign in
+      </button>
+    )
+  }
+
+  return (
+    <>
+      <button
+        ref={buttonRef}
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((prev) => !prev)}
+        title={`Signed in as ${authUsername}`}
+        className={cn(
+          'mr-1 flex items-center gap-1 rounded-sm px-2 py-1 text-xs font-medium transition-colors',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+          open ? 'bg-surface-3 text-ink-1' : 'bg-surface-2 text-ink-1 hover:bg-surface-3',
+        )}
+      >
+        <span aria-hidden="true" className="text-accent">●</span>
+        {authUsername}
+        <span aria-hidden="true" className="text-[10px] text-ink-3">▾</span>
+      </button>
+
+      {open && pos && createPortal(
+        <div
+          ref={menuRef}
+          role="menu"
+          aria-label="Account"
+          style={{ position: 'fixed', left: pos.left, top: pos.top }}
+          className="z-[60] min-w-[10rem] rounded-md border border-divider bg-surface-elev py-1 shadow-lg"
+        >
+          <button
+            role="menuitem"
+            type="button"
+            onClick={() => {
+              clearAuth()
+              setOpen(false)
+            }}
+            className="block w-full px-3 py-1.5 text-left text-xs text-ink-2 hover:bg-surface-3 hover:text-ink-1 focus-visible:outline-none focus-visible:bg-surface-3"
+          >
+            Log out
+          </button>
+        </div>,
+        document.body,
+      )}
+    </>
+  )
+}
+
 export function Toolbar() {
   const source        = useSimulator((s) => s.source)
   const assemble      = useSimulator((s) => s.assemble)
@@ -345,6 +443,9 @@ export function Toolbar() {
 
       {/* Right side: spacer pushes StatusPill to the far edge. */}
       <span className="flex-1" aria-hidden="true" />
+
+      {/* Enhancement Plan §6.4: account sign-in / username menu. */}
+      <AuthMenu />
 
       {/* Phase 3 SA-6: ? button opens the help dialog. F1 also
          opens it via the global keybinding map. */}
