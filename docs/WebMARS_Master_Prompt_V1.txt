@@ -163,7 +163,7 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   AGENT 04 — Monaco Light Theme + System Preference ............. ✅ COMPLETE
   AGENT 05 — rem Pseudo-Instruction (Assembler + Tests) ......... ✅ COMPLETE
   AGENT 06 — Tools: Bitmap Grid Sizes + Screen Magnifier ........ ✅ COMPLETE
-  AGENT 07 — Accounts UI: Auth Slice + AuthModal + Toolbar ...... ⬜ NOT STARTED
+  AGENT 07 — Accounts UI: Auth Slice + AuthModal + Toolbar ...... ✅ COMPLETE
   AGENT 08 — Save, Share & Deep Links (?snippet=<id>) ........... ⬜ NOT STARTED
   AGENT 09 — My Snippets Drawer + Public Feed ................... ⬜ NOT STARTED
   AGENT 10 — Run History: Logging Hook + HistoryPanel ........... ⬜ NOT STARTED
@@ -241,7 +241,14 @@ Mark each agent: ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   options; 8 panels tagged data-magnify-region; ScreenMagnifier rewritten
   as DOM-clone loupe (re-clone only on target change). Live browser
   proof: options list, clone-present on register table hover, hint on
-  Monaco hover, Escape closes. 138/138 green. PR #46.
+  Monaco hover, Escape closes. 138/138 green. PR #46 merged, main @
+  ac3f2c7.
+  ------------------------------------------------------------------------------
+  [2026-07-10] AGENT 07: accounts UI (REQ-021) done. Auth slice + AuthModal
+  + toolbar/mobile affordances. LIVE production round-trip proven against
+  the Railway API: register→login→refresh-persist→logout→401-toast→login.
+  Q2 catch: mobile drawer gained the System theme option (REQ-002-EXT-1).
+  138/138 green. PR #47.
   ------------------------------------------------------------------------------
 
 ================================================================================
@@ -878,7 +885,34 @@ APPENDIX A-06 — Tools: Bitmap + Magnifier
   PR # / MAIN COMMIT: PR #46.
 --------------------------------------------------------------------------------
 APPENDIX A-07 — Accounts UI
-  STATUS: / DATE: / PER-REQ (021): / BUILD+TEST: / PR #:
+  STATUS: ✅ COMPLETE / DATE: 2026-07-10
+  REQ-021: IMPLEMENTED —
+    src/hooks/useSimulator.ts: auth slice (authToken/authUsername mirroring
+      webmars.token/webmars.username — the exact keys api.ts reads;
+      setAuth/clearAuth; authModalOpen + open/close), privacy-mode-safe
+      read/write helpers.
+    src/ui/AuthModal.tsx: NEW — Login/Register tabs, busy state disabling
+      inputs + submit, error map (400 parses the GlobalExceptionHandler
+      field map; 401 'Wrong username or password.'; 409 'That username is
+      taken.'; 429 'Too many attempts…'; network fallback), register
+      auto-signs-in, Tab focus trap + Escape close + Enter submit
+      (REQ-037 pattern), initial focus on username.
+    src/ui/Toolbar.tsx: AuthMenu — 'Sign in' button ↔ ●username menu with
+      Log out (portal pattern mirroring ExamplesDropdown).
+    src/ui/MobileShell.tsx: Account drawer section (Sign in / Log out) +
+      System theme item (Q2 catch: the mobile theme list was a second
+      theme-picker instance REQ-002 implied — recorded as REQ-002-EXT-1).
+    src/ui/Shell.tsx: AuthModal mounted on desktop AND mobile paths.
+  LIVE PRODUCTION VERIFICATION (playwright + Edge headless, dev server
+    pointed at https://webmars-api-production.up.railway.app via
+    .env.local): register 200 → auto-login 200 → toolbar shows username;
+    reload → still signed in; Log out → Sign in returns; wrong password →
+    401 + 'Wrong username or password.' toast; correct login 200 → signed
+    in. Network log captured (register/login statuses). Discovered live:
+    usernames must match ^[a-zA-Z0-9_]+$ (backend @Pattern) — 400 path
+    exercised and mapped.
+  BUILD+TEST: typecheck 0 / lint 0 / build exit 0 / vitest 138/138.
+  PR # / MAIN COMMIT: PR #47.
 --------------------------------------------------------------------------------
 APPENDIX A-08 — Save, Share & Deep Links
   STATUS: / DATE: / PER-REQ (009/022/038): / BUILD+TEST: / PR #:
@@ -931,7 +965,8 @@ the exact owner action. At AGENT 94 exit: zero ⬜, zero 🔄.
   REQ-018 | p.16 §3.6.2; p.20 D1 | Frontend env-aware API base: VITE_API_BASE w/ localhost fallback; .env.local.example | INFRA | A02 | IMPLEMENTED | #42 | src/lib/api.ts:6; .env.local.example
   REQ-019 | p.16 §3.6.2; p.27 D10; p.56 §10.1 | Vercel env var VITE_API_BASE set + production redeploy + deployed-combo CORS check | INFRA | A92 | ⬜ | | dashboard = owner unless CLI authed
   REQ-020 | p.30-32 §6.1 | src/lib/api.ts typed client: ApiError, authHeader, request<T> w/ 204, full auth/snippets/runs surface per skeleton | FEATURE | A02 | IMPLEMENTED | #42 | src/lib/api.ts; src/tests/api.test.ts (5 tests)
-  REQ-021 | p.34-35 §6.4; p.22 D4 | Auth slice (webmars.token/webmars.username) + AuthModal (tabs, busy, 401/409/429/network msg map) + toolbar Sign-in/username/Log-out | FEATURE | A07 | ⬜ | |
+  REQ-021 | p.34-35 §6.4; p.22 D4 | Auth slice (webmars.token/webmars.username) + AuthModal (tabs, busy, 401/409/429/network msg map) + toolbar Sign-in/username/Log-out | FEATURE | A07 | IMPLEMENTED | #47 | AuthModal.tsx; live prod round-trip in A-07
+  REQ-002-EXT-1 | (Q2 of REQ-002) | Mobile drawer theme list gains the System option (second theme-picker instance) | FIX | A07 | IMPLEMENTED | #47 | MobileShell.tsx theme section
   REQ-022 | p.36 §6.5; p.23 D5 | Save-to-Account + ShareModal: create-vs-update semantics, copy link + toast, visibility shown + toggle → PUT | FEATURE | A08 | ⬜ | |
   REQ-023 | p.44-45 §7.7; p.22-24 D4-D5 | rem pseudo-instruction: lexer mnemonic, parser ["R","R","R"], assembler div+mfhi expansion [live assembler is instructions.ts; PDF-named files also updated] | FEATURE | A05 | IMPLEMENTED | #45 | instructions.ts rem case; pseudoInstructions.test.ts +4 tests
   REQ-024 | p.40 §7.3; p.24 D5 | Snippet entity v1.2: owner FK lazy, Visibility enum STRING, created/updated timestamps + lifecycle hooks | FEATURE | A12 | ⬜ | | pre-exists (verify)
